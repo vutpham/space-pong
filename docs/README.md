@@ -23,6 +23,15 @@ This project will be implemented with the following technologies:
 - Vanilla Javascript for game physics computations
 - `HTML5 Canvas` to create playing field and game pieces (ball and paddles)
 - CSS for styling game display
+- Webpack to bundle the various scripts
+
+In addition to webpack entry file, the following scripts will be used:
+`game.js`: This script will hold the game logistics such as the ball starting position, calculating ball velocity and scoring.
+
+`field.js`: This script will be responsible for creating, updating and rendering the playing field, ball, and paddles.
+
+`cpu.js`: This script will track the ball position and move the CPU paddle accordingly.
+
 
 ## Implementation Timeline
 **Day 1**: Create ball, paddle, and playing field using HTML 5. Add an event listener to allow the player's paddle to track the cursor. The ball should change size based on its distance from the far and near ends of the playing field.
