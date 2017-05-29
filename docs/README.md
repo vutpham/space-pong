@@ -15,7 +15,7 @@ The project will also include:
 - [ ] Production Readme
 
 ## Wireframes
-![image](wireframes/wireframe-field1.png)
+![image](wireframe-field1.png)
 
 ## Architecture and Technologies
 This project will be implemented with the following technologies:
