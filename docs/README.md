@@ -26,6 +26,7 @@ This project will be implemented with the following technologies:
 - Webpack to bundle the various scripts
 
 In addition to webpack entry file, the following scripts will be used:
+
 `game.js`: This script will hold the game logistics such as the ball starting position, calculating ball velocity and scoring.
 
 `field.js`: This script will be responsible for creating, updating and rendering the playing field, ball, and paddles.
