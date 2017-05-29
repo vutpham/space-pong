@@ -25,9 +25,13 @@ This project will be implemented with the following technologies:
 - CSS for styling game display
 
 ## Implementation Timeline
-** Day 1 ** Render ball, paddle, and field
-** Day 2 ** Scale ball size/distance, speed/curving
-** Day 3 ** Create AI for CPU paddle
+**Day 1**: Create ball, paddle, and playing field using HTML 5. Add an event listener to allow the player's paddle to track the cursor. The ball should change size based on its distance from the far and near ends of the playing field.
+
+**Day 2**: Implement game physics to scale the ball size and distance, as well as speeding up and curving the ball based on player interaction. Ball should be able to bounce off the Player/CPU paddles as well as the walls around the playing field.
+
+**Day 3** Create AI for CPU paddle. CPU should be able to track ball and move the paddle towards the ball position.
+
+**Day 4** Add start screen, scoring system, and styling to the game
 
 ## Bonus
 - [ ] Sounds
