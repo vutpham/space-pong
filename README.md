@@ -11,7 +11,7 @@ Pong 3D is a JavaScript clone of Curveball and a 3D version of the game Pong. It
 - [ ] 5 rounds
 
 ## Wireframes
-![image](wireframes/wireframe-field.png)
+![image](wireframes/wireframe-field1.png)
 
 ## Implementation Timeline
 1. Render ball, paddle, and field
