@@ -1,6 +1,6 @@
 let CENTER_X = 400;
 let CENTER_Y = 300;
-let MAX_DISTANCE = 75;
+let MAX_DISTANCE = 100;
 
 const init = () => {
   const stage = new createjs.Stage("myCanvas");
@@ -22,6 +22,8 @@ const init = () => {
 
   ball.direction = "out";
   ball.distance = 0;
+  ball.xVelocity = 5;
+  ball.yVelocity = 0;
 
   stage.update();
 
@@ -46,11 +48,30 @@ const hitBall = (ball, stage) => {
       ball.direction = "out";
     }
 
-    ball.scaleX = 1 - ball.distance/100;
-    ball.scaleY = 1 - ball.distance/100;
+    ball.scaleX = 1 - ball.distance * 3 / (4 * MAX_DISTANCE);
+    ball.scaleY = 1 - ball.distance * 3 / (4 * MAX_DISTANCE);
 
     ball.radius = 35 * ball.scaleX;
 
+    //closest box right bound x = 712, left bound x = 88
+    //            top boundy = 91, bottom bound y = 509
+
+    //furthest box right bound x = 479, left bound x = 321
+    //            top boundy = 353, bottom bound y = 247
+
+    ball.rawX += ball.xVelocity;
+    ball.farX = (ball.rawX - 400) * 79/312 + 400;
+
+    if (ball.rawX >= 712 || ball.rawX <= 88) {
+      ball.xVelocity = ball.xVelocity * -1;
+    }
+
+    ball.rawY += ball.yVelocity;
+    ball.farY = (ball.rawY - 300) * 53/209 + 300;
+
+    if (ball.rawY >= 512 || ball.rawY <= 92) {
+      ball.yVelocity = ball.yVelocity * -1;
+    }
 
     ball.x = ball.rawX - (ball.rawX - ball.farX) * ball.distance / MAX_DISTANCE;
     ball.y = ball.rawY - (ball.rawY - ball.farY) * ball.distance / MAX_DISTANCE;
