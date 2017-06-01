@@ -6,7 +6,7 @@ const init = () => {
   const stage = new createjs.Stage("myCanvas");
 
   const ball = new createjs.Shape();
-  ball.graphics.beginFill("LimeGreen").drawCircle(0, 0, 35);
+  ball.graphics.beginFill("ghostwhite").drawCircle(0, 0, 35);
   ball.name = "ball";
 
   renderField(stage);
@@ -19,7 +19,7 @@ const init = () => {
 
 };
 
-const setStage = (ball, stage, ballMarker) => () => {
+const setStage = (ball, stage, tracker) => () => {
   ball.x = 400;
   ball.y = 300;
   ball.rawX = 400;
@@ -32,7 +32,7 @@ const setStage = (ball, stage, ballMarker) => () => {
   ball.distance = 0;
   ball.xSpin = 0;
   ball.ySpin = 0;
-  stage.on('stagemousedown', hitBall(ball, stage, ballMarker));
+  stage.on('mousedown', hitBall(ball, stage, tracker));
 };
 
 const drawTracker = (stage, tracker) => {
@@ -65,6 +65,7 @@ const hitBall = (ball, stage, tracker) => (e) => {
       ball.xSpin += humanPaddle.x - humanPaddle.prevX;
       ball.ySpin += humanPaddle.y - humanPaddle.prevY;
     } else {
+      console.log('else detect human hit');
       ticker.removeEventListener('tick', scaleBall);
       setTimeout(setStage(ball, stage, tracker), 1000);
     }
@@ -86,19 +87,21 @@ const hitBall = (ball, stage, tracker) => (e) => {
 
   function scaleBall() {
 
+    if (ball.distance === MAX_DISTANCE) {
+      detectCpuHit();
+      ball.direction = "in";
+    } else if (ball.distance === 0){
+      console.log('will detect hit');
+      detectHumanHit();
+      ball.direction = "out";
+    }
+
     if (ball.direction === "out") {
       ball.distance += 1;
     } else {
       ball.distance -= 1;
     }
 
-    if (ball.distance === MAX_DISTANCE) {
-      detectCpuHit();
-      ball.direction = "in";
-    } else if (ball.distance === 0){
-      detectHumanHit();
-      ball.direction = "out";
-    }
 
     const trackerX = 88 + ball.distance * (322 - 88) / MAX_DISTANCE;
     const trackerY = 91 + ball.distance * (247 - 91) / MAX_DISTANCE;
@@ -106,23 +109,23 @@ const hitBall = (ball, stage, tracker) => (e) => {
     const trackerH = 418 - ball.distance * (418 - 106) / MAX_DISTANCE;
     tracker.graphics.clear().beginStroke("White").drawRect(trackerX, trackerY, trackerW, trackerH);
 
-    // scales ball of 1/4 of size at MAX_DISTANCE
-    ball.scaleX = 1 - ball.distance * 3 / (4 * MAX_DISTANCE);
-    ball.scaleY = 1 - ball.distance * 3 / (4 * MAX_DISTANCE);
+    // scales ball of 1/3 of size at MAX_DISTANCE
+    ball.scaleX = 1 - ball.distance * 2 / (3 * MAX_DISTANCE);
+    ball.scaleY = 1 - ball.distance * 2 / (3 * MAX_DISTANCE);
 
     ball.radius = 35 * ball.scaleX;
-
-    //closest box right bound x = 712, left bound x = 88
-    //            top boundy = 91, bottom bound y = 509
-
-    //furthest box right bound x = 479, left bound x = 321
-    //            top boundy = 353, bottom bound y = 247
 
     ball.rawX += ball.xVelocity;
     ball.endX = (ball.rawX - 400) * 79/312 + 400;
 
     ball.xVelocity -= ball.xSpin / MAX_DISTANCE;
     ball.yVelocity -= ball.ySpin / MAX_DISTANCE;
+
+    //closest box right bound x = 712, left bound x = 88
+    //            top boundy = 91, bottom bound y = 509
+
+    //furthest box right bound x = 479, left bound x = 321
+    //            top boundy = 353, bottom bound y = 247
 
     if (ball.rawX >= 677 || ball.rawX <= 122) {
       ball.xVelocity = ball.xVelocity * -1;
@@ -187,7 +190,6 @@ const renderPaddles = stage => {
   let humanPaddle = new createjs.Shape();
   humanPaddle.graphics.beginStroke("DarkBlue");
   humanPaddle.graphics.setStrokeStyle(4);
-  humanPaddle.snapToPixel = true;
   humanPaddle.graphics.drawRoundRect(0, 0, 120, 80, 10);
   humanPaddle.name = 'humanPaddle';
   humanPaddle.prevX = 0;
@@ -196,8 +198,7 @@ const renderPaddles = stage => {
   let cpuPaddle = new createjs.Shape();
   cpuPaddle.graphics.beginStroke("Red");
   cpuPaddle.graphics.setStrokeStyle(2);
-  cpuPaddle.snapToPixel = true;
-  cpuPaddle.graphics.drawRoundRect(324, 250, 30, 20, 2);
+  cpuPaddle.graphics.drawRoundRect(370, 300, 30, 20, 2);
   cpuPaddle.name = 'cpuPaddle';
 
 
