@@ -3,14 +3,34 @@ let CENTER_Y = 300;
 let MAX_DISTANCE = 100;
 
 class Field {
-  constructor(stage, game) {
+  constructor(stage) {
     this.stage = stage;
-    this.game = game;
     this.createField();
     this.gamePieces();
 
     this.ticker = createjs.Ticker;
     this.ticker.setFPS(60);
+
+    this.setStage();
+  }
+
+  setStage() {
+    const ball = this.stage.getChildByName('ball');
+    const tracker = this.stage.getChildByName('tracker');
+    ball.x = 400;
+    ball.y = 300;
+    ball.rawX = 400;
+    ball.rawY = 300;
+    ball.scaleX = 1;
+    ball.scaleY = 1;
+    ball.xVelocity = 0;
+    ball.yVelocity = 0;
+    ball.direction = "out";
+    ball.distance = 0;
+    ball.xSpin = 0;
+    ball.ySpin = 0;
+    tracker.graphics.clear().beginStroke("White").drawRect(88, 91, 624, 418);
+    this.stage.on('mousedown', this.hitBall.bind(this));
   }
 
   createPlayerPaddle() {
@@ -58,6 +78,7 @@ class Field {
 
   scaleBall() {
     const ball = this.stage.getChildByName('ball');
+
     ball.scaleX = 1 - ball.distance * 2 / (3 * MAX_DISTANCE);
     ball.scaleY = 1 - ball.distance * 2 / (3 * MAX_DISTANCE);
 
@@ -200,18 +221,19 @@ class Field {
     const ball = this.stage.getChildByName('ball');
     const playerPaddle = this.stage.getChildByName('playerPaddle');
 
-    if (ball.x - (ball.radius) <= playerPaddle.x + 120
-        && ball.x + (ball.radius) >= playerPaddle.x
-        && ball.y - (ball.radius) <= playerPaddle.y + 60
-        && ball.y + (ball.radius) >= playerPaddle.y) {
+    if (ball.x - (ball.radius - 10) <= playerPaddle.x + 120
+        && ball.x + (ball.radius - 10) >= playerPaddle.x
+        && ball.y - (ball.radius - 10) <= playerPaddle.y + 60
+        && ball.y + (ball.radius - 10) >= playerPaddle.y) {
       console.log(`${playerPaddle.x}, ${playerPaddle.prevX}`);
       this.getSpin();
     } else {
-      console.log('else --- player hit');
+      console.log(`${ball.x}, ${ball.radius}`);
+      console.log(`${playerPaddle.x}, ${playerPaddle.prevX}`);
+      console.log('did not hit');
       this.ticker.removeAllEventListeners('tick');
       this.ticker.addEventListener('tick', this.movePaddles.bind(this));
-      // setTimeout(this.setStage.bind(this), 1000);
-      this.game.resetPieces('player');
+      setTimeout(this.setStage.bind(this), 1000);
     }
   }
 
@@ -225,10 +247,9 @@ class Field {
         && ball.y - 300 + (ball.radius - 2) >= cpuPaddle.y - 10) {
       console.log(`cpu hit!`);
     } else {
-      console.log('no hit');
-      this.ticker.removeEventListener('tick', this.movePaddles.bind(this));
-      // setTimeout(setStage(ball, stage, tracker), 1000);
-      this.game.resetPieces('cpu');
+      this.ticker.removeAllEventListeners('tick');
+      this.ticker.addEventListener('tick', this.movePaddles.bind(this));
+      setTimeout(this.setStage.bind(this), 1000);
     }
   }
 
@@ -236,8 +257,10 @@ class Field {
     const ball = this.stage.getChildByName('ball');
     const playerPaddle = this.stage.getChildByName('playerPaddle');
 
+
     ball.xSpin += playerPaddle.x - playerPaddle.prevX;
     ball.ySpin += playerPaddle.y - playerPaddle.prevY;
+
   }
 
   addSpin() {
@@ -251,10 +274,10 @@ class Field {
     const ball = this.stage.getChildByName('ball');
 
     ball.rawX += ball.xVelocity;
-    ball.farX = (ball.rawX - 400) * 79/312 + 400;
+    ball.endX = (ball.rawX - 400) * 79/312 + 400;
 
     ball.rawY += ball.yVelocity;
-    ball.farY = (ball.rawY - 300) * 53/209 + 300;
+    ball.endY = (ball.rawY - 300) * 53/209 + 300;
   }
 
   detectWalls() {
@@ -274,10 +297,9 @@ class Field {
 
   applyScaling() {
     const ball = this.stage.getChildByName('ball');
-
     ball.x = ball.rawX - (ball.rawX - ball.endX) * ball.distance / MAX_DISTANCE;
     ball.y = ball.rawY - (ball.rawY - ball.endY) * ball.distance / MAX_DISTANCE;
-
+    console.log(ball.endX);
     // ball perspective at MIN distance
 
     if (ball.rawX > 400) {
