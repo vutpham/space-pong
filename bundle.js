@@ -63,47 +63,169 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ 	return __webpack_require__(__webpack_require__.s = 2);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports) {
 
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+
+INITIAL_RADIUS = 35;
+
+class Ball {
+
+  constructor(stage, maxDistance) {
+    this.stage = stage;
+    this.maxDistance = maxDistance;
+
+    this.shape = new createjs.Shape();
+
+    this.reset();
+  }
+
+  adjustForRadius() {
+    if (this.rawX > 400) {
+      this.shape.x -= this.radius * (this.rawX - 400)/312;
+    } else if (this.rawX < 400) {
+      this.shape.x += this.radius * (400 - this.rawX)/312;
+    }
+
+    if (this.rawY > 300) {
+      this.shape.y -= this.radius * (this.rawY - 300)/209;
+    } else if (this.rawY < 300) {
+      this.shape.y += this.radius * (300 - this.rawY)/209;
+    }
+  }
+
+  applyPerspective() {
+    const distanceFactor = this.distance / this.maxDistance;
+
+    this.shape.x = this.rawX - (this.rawX - this.farX) * distanceFactor;
+    this.shape.y = this.rawY - (this.rawY - this.farY) * distanceFactor;
+  }
+
+  applySpin() {
+    if (this.direction === "out"){
+      this.xVelocity -= this.xSpin / this.maxDistance;
+      this.yVelocity -= this.ySpin / this.maxDistance;
+    } else {
+      this.xVelocity += this.xSpin / this.maxDistance;
+      this.yVelocity += this.ySpin / this.maxDistance;
+    }
+  }
+
+  applyVelocity() {
+    this.rawX += this.xVelocity;
+    this.farX = (this.rawX - 400) * 79/312 + 400;
+
+    this.rawY += this.yVelocity;
+    this.farY = (this.rawY - 300) * 53/209 + 300;
+  }
+
+  draw() {
+    this.fillCommand = this.shape
+      .graphics
+      .beginRadialGradientFill(["#EEE","#444"], [0, 1], 15, -15, 0, 0, 0, 35).command;
+    this.silverGradient = this.fillCommand.style;
+    this.shape.graphics.drawCircle(0, 0, INITIAL_RADIUS);
+
+    this.stage.addChild(this.shape);
+  }
+
+  move() {
+    this.updateDistance();
+    this.scaleBall();
+    this.applySpin();
+    this.applyVelocity();
+    this.applyPerspective();
+    this.adjustForRadius();
+
+    this.stage.update();
+  }
+
+  reset() {
+    this.shape.x = 400;
+    this.shape.y = 300;
+
+    this.distance = 0;
+    this.direction = "out";
+    this.radius = INITIAL_RADIUS;
+
+    this.xVelocity = 0;
+    this.yVelocity = 0;
+
+    this.xSpin = 5 * (Math.random() - 0.5);
+    this.ySpin = 5 * (Math.random() - 0.5);
+
+    this.rawX = 400;
+    this.rawY = 300;
+
+    this.farX = 400;
+    this.farY = 300;
+
+    this.shape.scaleX = 1;
+    this.shape.scaleY = 1;
+
+    if (this.fillCommand) {
+      this.fillCommand.style = this.silverGradient;
+    }
+  }
+
+  scaleBall() {
+    this.shape.scaleX = 1 - this.distance * 3 / (4 * this.maxDistance);
+    this.shape.scaleY = 1 - this.distance * 3 / (4 * this.maxDistance);
+
+    this.radius = 35 * this.shape.scaleX;
+  }
+
+  updateDistance() {
+    if (this.direction === "out"){
+      this.distance += 1;
+    } else {
+      this.distance -= 1;
+    }
+  }
+}
+
+module.exports = Ball;
+
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports) {
+
 let CENTER_X = 400;
 let CENTER_Y = 300;
 let MAX_DISTANCE = 100;
 
 class Field {
-  constructor(stage) {
+  constructor(stage, game) {
     this.stage = stage;
-    this.renderField();
+    this.game = game;
+    this.createField();
     this.gamePieces();
 
     this.ticker = createjs.Ticker;
     this.ticker.setFPS(60);
-
-    this.setStage();
   }
 
   createPlayerPaddle() {
-    const humanPaddle = new createjs.Shape();
-    humanPaddle.graphics
+    const playerPaddle = new createjs.Shape();
+    playerPaddle.graphics
       .beginStroke("DarkBlue")
       .setStrokeStyle(4)
       .beginFill("LightBlue")
       .drawRoundRect(0, 0, 120, 80, 10);
-    humanPaddle.name = 'humanPaddle';
-    humanPaddle.alpha= 0.5;
-    humanPaddle.prevX = 0;
-    humanPaddle.prevY = 0;
+    playerPaddle.name = 'playerPaddle';
+    playerPaddle.alpha= 0.5;
+    playerPaddle.prevX = 0;
+    playerPaddle.prevY = 0;
 
-    this.stage.addChild(humanPaddle);
+    this.stage.addChild(playerPaddle);
   }
 
-  createAiPaddle() {
+  createCpuPaddle() {
     const cpuPaddle = new createjs.Shape();
     cpuPaddle.graphics
       .beginStroke("Red")
@@ -124,14 +246,15 @@ class Field {
     const ball = new createjs.Shape();
     ball.graphics
       .beginFill("ghostwhite")
-      .drawPolyStar(0, 0, 40, 10, 0.1);
+      .drawPolyStar(0, 0, 35, 10, 0.1);
     ball.name = 'ball';
 
+    this.createTracker();
     this.stage.addChild(ball);
-    this.drawTracker();
   }
 
   scaleBall() {
+    const ball = this.stage.getChildByName('ball');
     ball.scaleX = 1 - ball.distance * 2 / (3 * MAX_DISTANCE);
     ball.scaleY = 1 - ball.distance * 2 / (3 * MAX_DISTANCE);
 
@@ -141,43 +264,43 @@ class Field {
   gamePieces() {
     this.createPlayerPaddle();
     this.createBall();
-    this.createAiPaddle();
+    this.createCpuPaddle();
 
     createjs.Ticker.addEventListener('tick', this.movePaddles.bind(this));
   }
 
   movePlayerPaddle() {
-    const playerPaddle = this.stage.getChildByName('humanPaddle');
+    const playerPaddle = this.stage.getChildByName('playerPaddle');
 
     let difX;
     let difY;
 
-    // console.log(stage.mouseX);
-    // console.log(stage.mouseY);
+    // console.log(this.stage.mouseX);
+    // console.log(this.stage.mouseY);
 
     if (this.stage.mouseX < 652 && this.stage.mouseX > 148){
-      difX = this.stage.mouseX - humanPaddle.x - 60;
+      difX = this.stage.mouseX - playerPaddle.x - 60;
     } else if (this.stage.mouseX <= 148){
-      difX = 148 - humanPaddle.x - 60;
+      difX = 148 - playerPaddle.x - 60;
     } else {
-      difX = 652 - humanPaddle.x - 60;
+      difX = 652 - playerPaddle.x - 60;
     }
 
     if (this.stage.mouseY < 432 && this.stage.mouseY > 131){
-      difY = this.stage.mouseY - humanPaddle.y - 40;
+      difY = this.stage.mouseY - playerPaddle.y - 40;
     } else if (this.stage.mouseY <= 131){
-      difY = 131 - humanPaddle.y - 40;
+      difY = 131 - playerPaddle.y - 40;
     } else {
-      difY = 469 - humanPaddle.y - 40;
+      difY = 469 - playerPaddle.y - 40;
     }
 
-    humanPaddle.prevX = humanPaddle.x;
-    humanPaddle.prevY = humanPaddle.y;
-    humanPaddle.x += difX/1.2;
-    humanPaddle.y += difY/1.2;
+    playerPaddle.prevX = playerPaddle.x;
+    playerPaddle.prevY = playerPaddle.y;
+    playerPaddle.x += difX/1.2;
+    playerPaddle.y += difY/1.2;
   }
 
-  moveAiPaddle() {
+  moveCpuPaddle() {
     const ball = this.stage.getChildByName('ball');
     const cpuPaddle = this.stage.getChildByName('cpuPaddle');
     const cpuDifX = ball.rawX - 400 - cpuPaddle.rawX;
@@ -204,27 +327,46 @@ class Field {
   }
 
   movePaddles() {
-    this.moveHumanPaddle();
+    this.movePlayerPaddle();
     this.moveCpuPaddle();
     this.stage.update();
+  }
+
+  drawRectangle(shape, { x, y, w, h }) {
+    shape.graphics.beginStroke("Yellow");
+    shape.graphics.setStrokeStyle(1);
+    shape.snapToPixel = true;
+    shape.graphics.drawRect(x, y, w, h);
+
+    this.stage.addChild(shape);
+  }
+
+  drawCorner(shape, { mtx, mty, ltx, lty }) {
+    shape.graphics.beginStroke("Yellow");
+    shape.graphics.setStrokeStyle(1);
+    shape.snapToPixel = true;
+    shape.graphics.moveTo(mtx, mty);
+    shape.graphics.lineTo(ltx, lty);
+
+    this.stage.addChild(shape);
   }
 
   createField() {
     const borderFront = new createjs.Shape();
     const borderEnd = new createjs.Shape();
 
-    drawRectangle(this.stage, borderFront, { x: 88, y: 91, w: 624, h: 418 });
-    drawRectangle(this.stage, borderEnd, { x: 322, y: 247, w: 158, h: 106 });
+    this.drawRectangle(borderFront, { x: 88, y: 91, w: 624, h: 418 });
+    this.drawRectangle(borderEnd, { x: 322, y: 247, w: 158, h: 106 });
 
     let cornerNW = new createjs.Shape();
     let cornerNE = new createjs.Shape();
     let cornerSE = new createjs.Shape();
     let cornerSW = new createjs.Shape();
 
-    drawCorner(this.stage, cornerNW, { mtx: 88, mty: 91, ltx: 322, lty: 247 });
-    drawCorner(this.stage, cornerNW, { mtx: 712, mty: 91, ltx: 479, lty: 247 });
-    drawCorner(this.stage, cornerNW, { mtx: 712, mty: 509, ltx: 479, lty: 353 });
-    drawCorner(this.stage, cornerNW, { mtx: 88, mty: 509, ltx: 322, lty: 353 });
+    this.drawCorner(cornerNW, { mtx: 88, mty: 91, ltx: 322, lty: 247 });
+    this.drawCorner(cornerNW, { mtx: 712, mty: 91, ltx: 479, lty: 247 });
+    this.drawCorner(cornerNW, { mtx: 712, mty: 509, ltx: 479, lty: 353 });
+    this.drawCorner(cornerNW, { mtx: 88, mty: 509, ltx: 322, lty: 353 });
   }
 
   createTracker() {
@@ -253,24 +395,24 @@ class Field {
 
   detectPlayerPaddle() {
     const ball = this.stage.getChildByName('ball');
-    const playerPaddle = this.stage.getChildByName('humanPaddle');
+    const playerPaddle = this.stage.getChildByName('playerPaddle');
 
-    if (ball.x - (ball.radius) <= humanPaddle.x + 120
-        && ball.x + (ball.radius) >= humanPaddle.x
-        && ball.y - (ball.radius) <= humanPaddle.y + 60
-        && ball.y + (ball.radius) >= humanPaddle.y) {
-      console.log(`${humanPaddle.x}, ${humanPaddle.prevX}`);
-      ball.xSpin += humanPaddle.x - humanPaddle.prevX;
-      ball.ySpin += humanPaddle.y - humanPaddle.prevY;
+    if (ball.x - (ball.radius) <= playerPaddle.x + 120
+        && ball.x + (ball.radius) >= playerPaddle.x
+        && ball.y - (ball.radius) <= playerPaddle.y + 60
+        && ball.y + (ball.radius) >= playerPaddle.y) {
+      console.log(`${playerPaddle.x}, ${playerPaddle.prevX}`);
+      this.getSpin();
     } else {
-      console.log('else --- human hit');
+      console.log('else --- player hit');
       this.ticker.removeAllEventListeners('tick');
       this.ticker.addEventListener('tick', this.movePaddles.bind(this));
-      setTimeout(this.setStage.bind(this), 1000);
+      // setTimeout(this.setStage.bind(this), 1000);
+      this.game.resetPieces('player');
     }
   }
 
-  detectAiPaddle() {
+  detectCpuPaddle() {
     const ball = this.stage.getChildByName('ball');
     const cpuPaddle = this.stage.getChildByName('cpuPaddle');
 
@@ -281,20 +423,21 @@ class Field {
       console.log(`cpu hit!`);
     } else {
       console.log('no hit');
-      ticker.removeEventListener('tick', scaleBall);
-      setTimeout(setStage(ball, stage, tracker), 1000);
+      this.ticker.removeEventListener('tick', this.movePaddles.bind(this));
+      // setTimeout(setStage(ball, stage, tracker), 1000);
+      this.game.resetPieces('cpu');
     }
   }
 
   getSpin() {
     const ball = this.stage.getChildByName('ball');
-    const playerPaddle = this.stage.getChildByName('humanPaddle');
+    const playerPaddle = this.stage.getChildByName('playerPaddle');
 
-    ball.xSpin += humanPaddle.x - humanPaddle.prevX;
-    ball.ySpin += humanPaddle.y - humanPaddle.prevY;
+    ball.xSpin += playerPaddle.x - playerPaddle.prevX;
+    ball.ySpin += playerPaddle.y - playerPaddle.prevY;
   }
 
-  addSpin(){
+  addSpin() {
     const ball = this.stage.getChildByName('ball');
     ball.rotation += 8;
     ball.xVelocity -= ball.xSpin / MAX_DISTANCE;
@@ -346,7 +489,7 @@ class Field {
       ball.y += ball.radius * (300 - ball.rawY)/209;
     }
 
-  };
+  }
 
   updateDistance() {
     const ball = this.stage.getChildByName('ball');
@@ -356,19 +499,19 @@ class Field {
     } else {
       ball.distance -= 1;
     }
-  };
+  }
 
   detectHit() {
     const ball = this.stage.getChildByName('ball');
 
     if (ball.distance === MAX_DISTANCE){
-      this.detectCpuHit();
+      this.detectCpuPaddle();
       ball.direction = "in";
     } else if (ball.distance === 0){
-      this.detectHumanHit();
+      this.detectPlayerPaddle();
       ball.direction = "out";
     }
-  };
+  }
 
   moveBall() {
     this.scaleBall();
@@ -381,18 +524,140 @@ class Field {
     this.updateDistance();
 
     this.stage.update();
-  };
+  }
 
-  hitBall() {
+  hitBall(e) {
     e.remove();
     this.getSpin();
 
     this.ticker.addEventListener('tick', this.moveBall.bind(this));
-  };
+  }
+
 
 }
 
-/* harmony default export */ __webpack_exports__["default"] = (Field);
+module.exports = Field;
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Field = __webpack_require__(1);
+const Ball = __webpack_require__(0);
+
+const init = () => {
+  const stage = new createjs.Stage("myCanvas");
+  let field = new Field(stage);
+};
+
+document.addEventListener("DOMContentLoaded", init);
+
+//
+// class Game {
+//
+//   constructor() {
+//     this.stage = this.stage || new createjs.Stage("myCanvas");
+//     this.field = this.field || new Field(this.stage);
+//
+//     this.cpuLives = 3;
+//     this.playerLives = 3;
+//
+//     this.cpuLives();
+//     this.playerLives();
+//     this.setStage();
+//
+//   }
+//
+//   setStage() {
+//     const ball = this.stage.getChildByName('ball');
+//     const tracker = this.stage.getChildByName('tracker');
+//     ball.x = 400;
+//     ball.y = 300;
+//     ball.rawX = 400;
+//     ball.rawY = 300;
+//     ball.scaleX = 1;
+//     ball.scaleY = 1;
+//     ball.xVelocity = 0;
+//     ball.yVelocity = 0;
+//     ball.direction = "out";
+//     ball.distance = 0;
+//     ball.xSpin = 0;
+//     ball.ySpin = 0;
+//     tracker.graphics.clear().beginStroke("White").drawRect(88, 91, 624, 418);
+//     this.stage.on('mousedown', this.field.hitBall.bind(this.field));
+//   }
+//
+//   resetPieces(losingPlayer) {
+//     if(losingPlayer === 'cpu') {
+//       this.updateCpuLives();
+//     } else {
+//       this.playerLives -= 1;
+//     }
+//     setTimeout(this.setStage.bind(this), 1000);
+//   }
+//
+//   updateCpuLives() {
+//     if (this.cpuLives > 0) {
+//       this.lives[this.cpuLives - 1].graphics.clear();
+//       this.cpuLives -= 1;
+//     } else {
+//       this.printYouWon();
+//     }
+//   }
+//
+//   printYouWon() {
+//     const text = new createjs.Text("You Win", "36px Arial", "White");
+//     text.x = 400;
+//     text.y = 300;
+//
+//     this.stage.addChild(text);
+//
+//     this.stage.update();
+//   }
+//
+//   printCpuLives() {
+//     this.lives = [];
+//     for (let i = 0; i < this.cpuLives; i++) {
+//       this.lives[i] = new createjs.Shape();
+//       this.lives[i].graphics.beginFill("Red").drawCircle((160 + i * 25), 62, 10);
+//
+//       this.stage.addChild(this.lives[i]);
+//     }
+//   }
+//
+//
+//   printPlayerLives() {
+//
+//   }
+//
+//   cpuText() {
+//     const text = new createjs.Text("CPU", "20px Arial", "White");
+//     text.x = 100;
+//     text.y = 70;
+//     text.textBaseline = "alphabetic";
+//
+//     this.stage.addChild(text);
+//     this.stage.update();
+//   }
+//
+//   playerText() {
+//     const text = new createjs.Text("Player", "20px Arial", "White");
+//     text.x = 450;
+//     text.y = 70;
+//
+//     this.stage.addChild(text);
+//     this.stage.update();
+//   }
+// }
+//
+// const init = () => {
+//   const game = new Game;
+// };
+//
+// document.addEventListener("DOMContentLoaded", init);
+//
+// export default Game;
 
 
 /***/ })

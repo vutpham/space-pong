@@ -3,33 +3,32 @@ let CENTER_Y = 300;
 let MAX_DISTANCE = 100;
 
 class Field {
-  constructor(stage) {
+  constructor(stage, game) {
     this.stage = stage;
-    this.renderField();
+    this.game = game;
+    this.createField();
     this.gamePieces();
 
     this.ticker = createjs.Ticker;
     this.ticker.setFPS(60);
-
-    this.setStage();
   }
 
   createPlayerPaddle() {
-    const humanPaddle = new createjs.Shape();
-    humanPaddle.graphics
+    const playerPaddle = new createjs.Shape();
+    playerPaddle.graphics
       .beginStroke("DarkBlue")
       .setStrokeStyle(4)
       .beginFill("LightBlue")
       .drawRoundRect(0, 0, 120, 80, 10);
-    humanPaddle.name = 'humanPaddle';
-    humanPaddle.alpha= 0.5;
-    humanPaddle.prevX = 0;
-    humanPaddle.prevY = 0;
+    playerPaddle.name = 'playerPaddle';
+    playerPaddle.alpha= 0.5;
+    playerPaddle.prevX = 0;
+    playerPaddle.prevY = 0;
 
-    this.stage.addChild(humanPaddle);
+    this.stage.addChild(playerPaddle);
   }
 
-  createAiPaddle() {
+  createCpuPaddle() {
     const cpuPaddle = new createjs.Shape();
     cpuPaddle.graphics
       .beginStroke("Red")
@@ -50,14 +49,15 @@ class Field {
     const ball = new createjs.Shape();
     ball.graphics
       .beginFill("ghostwhite")
-      .drawPolyStar(0, 0, 40, 10, 0.1);
+      .drawPolyStar(0, 0, 35, 10, 0.1);
     ball.name = 'ball';
 
+    this.createTracker();
     this.stage.addChild(ball);
-    this.drawTracker();
   }
 
   scaleBall() {
+    const ball = this.stage.getChildByName('ball');
     ball.scaleX = 1 - ball.distance * 2 / (3 * MAX_DISTANCE);
     ball.scaleY = 1 - ball.distance * 2 / (3 * MAX_DISTANCE);
 
@@ -67,13 +67,13 @@ class Field {
   gamePieces() {
     this.createPlayerPaddle();
     this.createBall();
-    this.createAiPaddle();
+    this.createCpuPaddle();
 
     createjs.Ticker.addEventListener('tick', this.movePaddles.bind(this));
   }
 
   movePlayerPaddle() {
-    const playerPaddle = this.stage.getChildByName('humanPaddle');
+    const playerPaddle = this.stage.getChildByName('playerPaddle');
 
     let difX;
     let difY;
@@ -82,28 +82,28 @@ class Field {
     // console.log(this.stage.mouseY);
 
     if (this.stage.mouseX < 652 && this.stage.mouseX > 148){
-      difX = this.stage.mouseX - humanPaddle.x - 60;
+      difX = this.stage.mouseX - playerPaddle.x - 60;
     } else if (this.stage.mouseX <= 148){
-      difX = 148 - humanPaddle.x - 60;
+      difX = 148 - playerPaddle.x - 60;
     } else {
-      difX = 652 - humanPaddle.x - 60;
+      difX = 652 - playerPaddle.x - 60;
     }
 
     if (this.stage.mouseY < 432 && this.stage.mouseY > 131){
-      difY = this.stage.mouseY - humanPaddle.y - 40;
+      difY = this.stage.mouseY - playerPaddle.y - 40;
     } else if (this.stage.mouseY <= 131){
-      difY = 131 - humanPaddle.y - 40;
+      difY = 131 - playerPaddle.y - 40;
     } else {
-      difY = 469 - humanPaddle.y - 40;
+      difY = 469 - playerPaddle.y - 40;
     }
 
-    humanPaddle.prevX = humanPaddle.x;
-    humanPaddle.prevY = humanPaddle.y;
-    humanPaddle.x += difX/1.2;
-    humanPaddle.y += difY/1.2;
+    playerPaddle.prevX = playerPaddle.x;
+    playerPaddle.prevY = playerPaddle.y;
+    playerPaddle.x += difX/1.2;
+    playerPaddle.y += difY/1.2;
   }
 
-  moveAiPaddle() {
+  moveCpuPaddle() {
     const ball = this.stage.getChildByName('ball');
     const cpuPaddle = this.stage.getChildByName('cpuPaddle');
     const cpuDifX = ball.rawX - 400 - cpuPaddle.rawX;
@@ -130,27 +130,46 @@ class Field {
   }
 
   movePaddles() {
-    this.moveHumanPaddle();
+    this.movePlayerPaddle();
     this.moveCpuPaddle();
     this.stage.update();
+  }
+
+  drawRectangle(shape, { x, y, w, h }) {
+    shape.graphics.beginStroke("Yellow");
+    shape.graphics.setStrokeStyle(1);
+    shape.snapToPixel = true;
+    shape.graphics.drawRect(x, y, w, h);
+
+    this.stage.addChild(shape);
+  }
+
+  drawCorner(shape, { mtx, mty, ltx, lty }) {
+    shape.graphics.beginStroke("Yellow");
+    shape.graphics.setStrokeStyle(1);
+    shape.snapToPixel = true;
+    shape.graphics.moveTo(mtx, mty);
+    shape.graphics.lineTo(ltx, lty);
+
+    this.stage.addChild(shape);
   }
 
   createField() {
     const borderFront = new createjs.Shape();
     const borderEnd = new createjs.Shape();
 
-    drawRectangle(this.stage, borderFront, { x: 88, y: 91, w: 624, h: 418 });
-    drawRectangle(this.stage, borderEnd, { x: 322, y: 247, w: 158, h: 106 });
+    this.drawRectangle(borderFront, { x: 88, y: 91, w: 624, h: 418 });
+    this.drawRectangle(borderEnd, { x: 322, y: 247, w: 158, h: 106 });
 
     let cornerNW = new createjs.Shape();
     let cornerNE = new createjs.Shape();
     let cornerSE = new createjs.Shape();
     let cornerSW = new createjs.Shape();
 
-    drawCorner(this.stage, cornerNW, { mtx: 88, mty: 91, ltx: 322, lty: 247 });
-    drawCorner(this.stage, cornerNW, { mtx: 712, mty: 91, ltx: 479, lty: 247 });
-    drawCorner(this.stage, cornerNW, { mtx: 712, mty: 509, ltx: 479, lty: 353 });
-    drawCorner(this.stage, cornerNW, { mtx: 88, mty: 509, ltx: 322, lty: 353 });
+    this.drawCorner(cornerNE, { mtx: 88, mty: 91, ltx: 322, lty: 247 });
+    this.drawCorner(cornerSE, { mtx: 712, mty: 91, ltx: 479, lty: 247 });
+    this.drawCorner(cornerSW, { mtx: 712, mty: 509, ltx: 479, lty: 353 });
+    this.drawCorner(cornerNW, { mtx: 88, mty: 509, ltx: 322, lty: 353 });
   }
 
   createTracker() {
@@ -179,24 +198,24 @@ class Field {
 
   detectPlayerPaddle() {
     const ball = this.stage.getChildByName('ball');
-    const playerPaddle = this.stage.getChildByName('humanPaddle');
+    const playerPaddle = this.stage.getChildByName('playerPaddle');
 
-    if (ball.x - (ball.radius) <= humanPaddle.x + 120
-        && ball.x + (ball.radius) >= humanPaddle.x
-        && ball.y - (ball.radius) <= humanPaddle.y + 60
-        && ball.y + (ball.radius) >= humanPaddle.y) {
-      console.log(`${humanPaddle.x}, ${humanPaddle.prevX}`);
-      ball.xSpin += humanPaddle.x - humanPaddle.prevX;
-      ball.ySpin += humanPaddle.y - humanPaddle.prevY;
+    if (ball.x - (ball.radius) <= playerPaddle.x + 120
+        && ball.x + (ball.radius) >= playerPaddle.x
+        && ball.y - (ball.radius) <= playerPaddle.y + 60
+        && ball.y + (ball.radius) >= playerPaddle.y) {
+      console.log(`${playerPaddle.x}, ${playerPaddle.prevX}`);
+      this.getSpin();
     } else {
-      console.log('else --- human hit');
+      console.log('else --- player hit');
       this.ticker.removeAllEventListeners('tick');
       this.ticker.addEventListener('tick', this.movePaddles.bind(this));
-      setTimeout(this.setStage.bind(this), 1000);
+      // setTimeout(this.setStage.bind(this), 1000);
+      this.game.resetPieces('player');
     }
   }
 
-  detectAiPaddle() {
+  detectCpuPaddle() {
     const ball = this.stage.getChildByName('ball');
     const cpuPaddle = this.stage.getChildByName('cpuPaddle');
 
@@ -207,20 +226,21 @@ class Field {
       console.log(`cpu hit!`);
     } else {
       console.log('no hit');
-      ticker.removeEventListener('tick', scaleBall);
-      setTimeout(setStage(ball, stage, tracker), 1000);
+      this.ticker.removeEventListener('tick', this.movePaddles.bind(this));
+      // setTimeout(setStage(ball, stage, tracker), 1000);
+      this.game.resetPieces('cpu');
     }
   }
 
   getSpin() {
     const ball = this.stage.getChildByName('ball');
-    const playerPaddle = this.stage.getChildByName('humanPaddle');
+    const playerPaddle = this.stage.getChildByName('playerPaddle');
 
-    ball.xSpin += humanPaddle.x - humanPaddle.prevX;
-    ball.ySpin += humanPaddle.y - humanPaddle.prevY;
+    ball.xSpin += playerPaddle.x - playerPaddle.prevX;
+    ball.ySpin += playerPaddle.y - playerPaddle.prevY;
   }
 
-  addSpin(){
+  addSpin() {
     const ball = this.stage.getChildByName('ball');
     ball.rotation += 8;
     ball.xVelocity -= ball.xSpin / MAX_DISTANCE;
@@ -272,7 +292,7 @@ class Field {
       ball.y += ball.radius * (300 - ball.rawY)/209;
     }
 
-  };
+  }
 
   updateDistance() {
     const ball = this.stage.getChildByName('ball');
@@ -282,19 +302,19 @@ class Field {
     } else {
       ball.distance -= 1;
     }
-  };
+  }
 
   detectHit() {
     const ball = this.stage.getChildByName('ball');
 
     if (ball.distance === MAX_DISTANCE){
-      this.detectCpuHit();
+      this.detectCpuPaddle();
       ball.direction = "in";
     } else if (ball.distance === 0){
-      this.detectHumanHit();
+      this.detectPlayerPaddle();
       ball.direction = "out";
     }
-  };
+  }
 
   moveBall() {
     this.scaleBall();
@@ -307,15 +327,16 @@ class Field {
     this.updateDistance();
 
     this.stage.update();
-  };
+  }
 
   hitBall(e) {
     e.remove();
     this.getSpin();
 
     this.ticker.addEventListener('tick', this.moveBall.bind(this));
-  };
+  }
+
 
 }
 
-export default Field;
+module.exports = Field;
