@@ -7,6 +7,11 @@ class Field {
     this.stage = stage;
     this.renderField();
     this.gamePieces();
+
+    this.ticker = createjs.Ticker;
+    this.ticker.setFPS(60);
+
+    this.setStage();
   }
 
   createPlayerPaddle() {
@@ -49,6 +54,14 @@ class Field {
     ball.name = 'ball';
 
     this.stage.addChild(ball);
+    this.drawTracker();
+  }
+
+  scaleBall() {
+    ball.scaleX = 1 - ball.distance * 2 / (3 * MAX_DISTANCE);
+    ball.scaleY = 1 - ball.distance * 2 / (3 * MAX_DISTANCE);
+
+    ball.radius = 35 * ball.scaleX;
   }
 
   gamePieces() {
@@ -57,7 +70,6 @@ class Field {
     this.createAiPaddle();
 
     createjs.Ticker.addEventListener('tick', this.movePaddles.bind(this));
-    createjs.Ticker.setFPS(60);
   }
 
   movePlayerPaddle() {
@@ -66,8 +78,8 @@ class Field {
     let difX;
     let difY;
 
-    // console.log(stage.mouseX);
-    // console.log(stage.mouseY);
+    // console.log(this.stage.mouseX);
+    // console.log(this.stage.mouseY);
 
     if (this.stage.mouseX < 652 && this.stage.mouseX > 148){
       difX = this.stage.mouseX - humanPaddle.x - 60;
@@ -141,56 +153,34 @@ class Field {
     drawCorner(this.stage, cornerNW, { mtx: 88, mty: 509, ltx: 322, lty: 353 });
   }
 
+  createTracker() {
+    const tracker = new createjs.Shape();
 
-const init = () => {
-  const stage = new createjs.Stage("myCanvas");
+    tracker.graphics.beginStroke("White");
+    tracker.graphics.setStrokeStyle(2);
+    tracker.graphics.snapToPixel = true;
+    tracker.graphics.drawRect(88, 91, 624, 418);
+    tracker.name = 'tracker';
 
-  let field = new Field(stage)
+    this.stage.addChild(tracker);
+  }
 
-  const tracker = new createjs.Shape();
-  drawTracker(stage, tracker);
-  setStage(stage.getChildByName('ball'), stage, tracker)();
+  scaleTracker() {
+    const tracker = this.stage.getChildByName('tracker');
+    const ball = this.stage.getChildByName('ball');
 
-};
+    const trackerX = 88 + ball.distance * (322 - 88) / MAX_DISTANCE;
+    const trackerY = 91 + ball.distance * (247 - 91) / MAX_DISTANCE;
+    const trackerW = 624 - ball.distance * (624 - 158) / MAX_DISTANCE;
+    const trackerH = 418 - ball.distance * (418 - 106) / MAX_DISTANCE;
 
-const setStage = (ball, stage, tracker) => () => {
-  ball.x = 400;
-  ball.y = 300;
-  ball.rawX = 400;
-  ball.rawY = 300;
-  ball.scaleX = 1;
-  ball.scaleY = 1;
-  ball.xVelocity = 0;
-  ball.yVelocity = 0;
-  ball.direction = "out";
-  ball.distance = 0;
-  ball.xSpin = 0;
-  ball.ySpin = 0;
-  stage.on('mousedown', hitBall(ball, stage, tracker));
-};
+    tracker.graphics.clear().beginStroke("White").drawRect(trackerX, trackerY, trackerW, trackerH);
+  }
 
-const drawTracker = (stage, tracker) => {
-  tracker.graphics.beginStroke("White");
-  tracker.graphics.setStrokeStyle(2);
-  tracker.graphics.drawRect(88, 91, 624, 418);
+  detectPlayerPaddle() {
+    const ball = this.stage.getChildByName('ball');
+    const playerPaddle = this.stage.getChildByName('humanPaddle');
 
-  stage.addChild(tracker);
-};
-
-const hitBall = (ball, stage, tracker) => (e) => {
-  e.remove();
-  const humanPaddle = stage.getChildByName('humanPaddle');
-  const cpuPaddle = stage.getChildByName('cpuPaddle');
-
-  ball.xSpin += humanPaddle.x - humanPaddle.prevX;
-  ball.ySpin += humanPaddle.y - humanPaddle.prevY;
-
-
-  const ticker = createjs.Ticker;
-  createjs.Ticker.addEventListener('tick', scaleBall);
-  createjs.Ticker.setFPS(60);
-
-  function detectHumanHit() {
     if (ball.x - (ball.radius) <= humanPaddle.x + 120
         && ball.x + (ball.radius) >= humanPaddle.x
         && ball.y - (ball.radius) <= humanPaddle.y + 60
@@ -200,12 +190,16 @@ const hitBall = (ball, stage, tracker) => (e) => {
       ball.ySpin += humanPaddle.y - humanPaddle.prevY;
     } else {
       console.log('else --- human hit');
-      ticker.removeEventListener('tick', scaleBall);
-      setTimeout(setStage(ball, stage, tracker), 1000);
+      this.ticker.removeAllEventListeners('tick');
+      this.ticker.addEventListener('tick', this.movePaddles.bind(this));
+      setTimeout(this.setStage.bind(this), 1000);
     }
   }
 
-  function detectCpuHit() {
+  detectAiPaddle() {
+    const ball = this.stage.getChildByName('ball');
+    const cpuPaddle = this.stage.getChildByName('cpuPaddle');
+
     if (ball.x - 400 - (ball.radius - 2) <= cpuPaddle.x + 15
         && ball.x - 400 + (ball.radius - 2) >= cpuPaddle.x - 15
         && ball.y - 300 - (ball.radius - 2) <= cpuPaddle.y + 10
@@ -218,90 +212,110 @@ const hitBall = (ball, stage, tracker) => (e) => {
     }
   }
 
+  getSpin() {
+    const ball = this.stage.getChildByName('ball');
+    const playerPaddle = this.stage.getChildByName('humanPaddle');
 
-  function scaleBall() {
+    ball.xSpin += humanPaddle.x - humanPaddle.prevX;
+    ball.ySpin += humanPaddle.y - humanPaddle.prevY;
+  }
 
-    if (ball.distance === MAX_DISTANCE) {
-      console.log(ball.x);
-      console.log(ball.y);
-      detectCpuHit();
-      ball.direction = "in";
-    } else if (ball.distance === 0){
-      console.log('detected hit');
-      detectHumanHit();
-      ball.direction = "out";
-    }
-
-    if (ball.direction === "out") {
-      ball.distance += 1;
-    } else {
-      ball.distance -= 1;
-    }
-
+  addSpin(){
+    const ball = this.stage.getChildByName('ball');
     ball.rotation += 8;
-
-
-    const trackerX = 88 + ball.distance * (322 - 88) / MAX_DISTANCE;
-    const trackerY = 91 + ball.distance * (247 - 91) / MAX_DISTANCE;
-    const trackerW = 624 - ball.distance * (624 - 158) / MAX_DISTANCE;
-    const trackerH = 418 - ball.distance * (418 - 106) / MAX_DISTANCE;
-    tracker.graphics.clear().beginStroke("White").drawRect(trackerX, trackerY, trackerW, trackerH);
-
-    // scales ball of 1/3 of size at MAX_DISTANCE
-    ball.scaleX = 1 - ball.distance * 2 / (3 * MAX_DISTANCE);
-    ball.scaleY = 1 - ball.distance * 2 / (3 * MAX_DISTANCE);
-
-    ball.radius = 35 * ball.scaleX;
-
-    ball.rawX += ball.xVelocity;
-    ball.endX = (ball.rawX - 400) * 79/312 + 400;
-
     ball.xVelocity -= ball.xSpin / MAX_DISTANCE;
     ball.yVelocity -= ball.ySpin / MAX_DISTANCE;
+  }
 
-    //closest box right bound x = 712, left bound x = 88
-    //            top boundy = 91, bottom bound y = 509
+  addVelocity() {
+    const ball = this.stage.getChildByName('ball');
 
-    //furthest box right bound x = 479, left bound x = 321
-    //            top boundy = 353, bottom bound y = 247
+    ball.rawX += ball.xVelocity;
+    ball.farX = (ball.rawX - 400) * 79/312 + 400;
+
+    ball.rawY += ball.yVelocity;
+    ball.farY = (ball.rawY - 300) * 53/209 + 300;
+  }
+
+  detectWalls() {
+    const ball = this.stage.getChildByName('ball');
 
     if (ball.rawX >= 677 || ball.rawX <= 122) {
       ball.xVelocity = ball.xVelocity * -1;
       ball.xSpin = 0;
     }
 
-    ball.rawY += ball.yVelocity;
-    ball.endY = (ball.rawY - 300) * 53/209 + 300;
-
     if (ball.rawY >= (512 - 35) || ball.rawY <= (92 + 35)) {
       ball.yVelocity = ball.yVelocity * -1;
       ball.ySpin = 0;
     }
 
+  }
+
+  applyScaling() {
+    const ball = this.stage.getChildByName('ball');
+
     ball.x = ball.rawX - (ball.rawX - ball.endX) * ball.distance / MAX_DISTANCE;
     ball.y = ball.rawY - (ball.rawY - ball.endY) * ball.distance / MAX_DISTANCE;
 
-    stage.update();
-  }
-};
+    // ball perspective at MIN distance
 
-const drawRectangle = (stage, shape, { x, y, w, h }) => {
-  shape.graphics.beginStroke("Yellow");
-  shape.graphics.setStrokeStyle(1);
-  shape.snapToPixel = true;
-  shape.graphics.drawRect(x, y, w, h);
+    if (ball.rawX > 400) {
+      ball.x -= ball.radius * (ball.rawX - 400)/312;
+    } else if (ball.rawX < 400) {
+      ball.x += ball.radius * (400 - ball.rawX)/312;
+    }
 
-  stage.addChild(shape);
-};
+    if (ball.rawY > 300) {
+      ball.y -= ball.radius * (ball.rawY - 300)/209;
+    } else if (ball.rawY < 300) {
+      ball.y += ball.radius * (300 - ball.rawY)/209;
+    }
 
-const drawCorner = (stage, shape, { mtx, mty, ltx, lty }) => {
-  shape.graphics.beginStroke("Yellow");
-  shape.graphics.setStrokeStyle(1);
-  shape.snapToPixel = true;
-  shape.graphics.moveTo(mtx, mty);
-  shape.graphics.lineTo(ltx, lty);
+  };
 
-  stage.addChild(shape);
-};
+  updateDistance() {
+    const ball = this.stage.getChildByName('ball');
 
-};
+    if (ball.direction === "out") {
+      ball.distance += 1;
+    } else {
+      ball.distance -= 1;
+    }
+  };
+
+  detectHit() {
+    const ball = this.stage.getChildByName('ball');
+
+    if (ball.distance === MAX_DISTANCE){
+      this.detectCpuHit();
+      ball.direction = "in";
+    } else if (ball.distance === 0){
+      this.detectHumanHit();
+      ball.direction = "out";
+    }
+  };
+
+  moveBall() {
+    this.scaleBall();
+    this.scaleTracker();
+    this.addSpin();
+    this.addVelocity();
+    this.applyScaling();
+    this.detectWalls();
+    this.detectHit();
+    this.updateDistance();
+
+    this.stage.update();
+  };
+
+  hitBall(e) {
+    e.remove();
+    this.getSpin();
+
+    this.ticker.addEventListener('tick', this.moveBall.bind(this));
+  };
+
+}
+
+export default Field;
