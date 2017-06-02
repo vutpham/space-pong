@@ -6,7 +6,8 @@ const init = () => {
   const stage = new createjs.Stage("myCanvas");
 
   const ball = new createjs.Shape();
-  ball.graphics.beginFill("ghostwhite").drawCircle(0, 0, 35);
+  ball.graphics.beginFill("lightgreen").drawPolyStar(0, 0, 40, 10, 0.1);
+  // ball.graphics.beginFill("ghostwhite").drawCircle(0, 0, 35);
   ball.name = "ball";
 
   renderField(stage);
@@ -65,7 +66,7 @@ const hitBall = (ball, stage, tracker) => (e) => {
       ball.xSpin += humanPaddle.x - humanPaddle.prevX;
       ball.ySpin += humanPaddle.y - humanPaddle.prevY;
     } else {
-      console.log('else detect human hit');
+      console.log('else --- human hit');
       ticker.removeEventListener('tick', scaleBall);
       setTimeout(setStage(ball, stage, tracker), 1000);
     }
@@ -78,6 +79,7 @@ const hitBall = (ball, stage, tracker) => (e) => {
         && ball.y - 300 + (ball.radius - 2) >= cpuPaddle.y - 10) {
       console.log(`cpu hit!`);
     } else {
+      console.log('no hit');
       ticker.removeEventListener('tick', scaleBall);
       setTimeout(setStage(ball, stage, tracker), 1000);
     }
@@ -88,10 +90,12 @@ const hitBall = (ball, stage, tracker) => (e) => {
   function scaleBall() {
 
     if (ball.distance === MAX_DISTANCE) {
+      console.log(ball.x);
+      console.log(ball.y);
       detectCpuHit();
       ball.direction = "in";
     } else if (ball.distance === 0){
-      console.log('will detect hit');
+      console.log('detected hit');
       detectHumanHit();
       ball.direction = "out";
     }
@@ -101,6 +105,8 @@ const hitBall = (ball, stage, tracker) => (e) => {
     } else {
       ball.distance -= 1;
     }
+
+    ball.rotation += 8;
 
 
     const trackerX = 88 + ball.distance * (322 - 88) / MAX_DISTANCE;
@@ -168,11 +174,11 @@ const drawCorner = (stage, shape, { mtx, mty, ltx, lty }) => {
 
 const renderField = stage => {
 
-  const border1 = new createjs.Shape();
-  const border9 = new createjs.Shape();
+  const borderFront = new createjs.Shape();
+  const borderEnd = new createjs.Shape();
 
-  drawRectangle(stage, border1, { x: 88, y: 91, w: 624, h: 418 });
-  drawRectangle(stage, border9, { x: 322, y: 247, w: 158, h: 106 });
+  drawRectangle(stage, borderFront, { x: 88, y: 91, w: 624, h: 418 });
+  drawRectangle(stage, borderEnd, { x: 322, y: 247, w: 158, h: 106 });
 
   let cornerNW = new createjs.Shape();
   let cornerNE = new createjs.Shape();
@@ -200,6 +206,10 @@ const renderPaddles = stage => {
   cpuPaddle.graphics.setStrokeStyle(2);
   cpuPaddle.graphics.drawRoundRect(370, 300, 30, 20, 2);
   cpuPaddle.name = 'cpuPaddle';
+  cpuPaddle.rawX = 0;
+  cpuPaddle.rawY = 0;
+  cpuPaddle.prevRawX = 0;
+  cpuPaddle.prevRawY = 0;
 
 
   stage.addChild(cpuPaddle);
@@ -240,14 +250,14 @@ const renderPaddles = stage => {
 
     cpuPaddle.prevX = cpuPaddle.rawX;
     cpuPaddle.prevY = cpuPaddle.rawY;
-    cpuPaddle.rawX += cpuDifX/10;
+    cpuPaddle.rawX += cpuDifX/24;
     if (cpuPaddle.rawX > 249){
       cpuPaddle.rawX = 249;
     } else if (cpuPaddle.rawX < -241) {
       cpuPaddle.rawX = -241;
     }
 
-    cpuPaddle.rawY += cpuDifY/10;
+    cpuPaddle.rawY += cpuDifY/25;
     if (cpuPaddle.rawY > 161){
       cpuPaddle.rawY = 161;
     } else if (cpuPaddle.rawY < -161) {

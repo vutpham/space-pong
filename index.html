@@ -3,12 +3,14 @@
   <head>
     <meta charset="utf-8">
     <title>PONG 3D</title>
-    <link rel="stylesheet" type="text/css" href="./css/main.css">
+    <link rel="stylesheet" type="text/css" href="./css/main.scss">
     <script src="https://code.createjs.com/easeljs-0.8.2.min.js"></script>
     <script src="./frontend/field.js"></script>
   </head>
-  <body onload="init();">
+  <body class="body" onload="init();">
     <h2>PONG 3D</h2>
-    <canvas id="myCanvas" width="800" height="600"></canvas>
+    <div class="main">
+      <canvas id="myCanvas" width="800" height="600"></canvas>
+    </div>
   </body>
 </html>

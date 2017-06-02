@@ -1,0 +1,33 @@
+body {
+  background-color: #1B998B;
+}
+
+h2 {
+  font-size: 40px;
+  padding: 5px;
+  margin: 0;
+  color: #ED217C;
+}
+
+#myCanvas {
+  background-color: #2D3047;
+  border-radius: 30px;
+  border: 8px solid black;
+}
+
+h2 {
+  display: flex;
+  justify-content: center;
+}
+
+.body {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+// $teal: #1B998B;
+// $pink: #ED217C;
+// $navy: #2D3047;
+// $yellow: #FFFD82;
+// $peach: #FF9B71;
