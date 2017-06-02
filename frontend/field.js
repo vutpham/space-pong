@@ -2,11 +2,150 @@ let CENTER_X = 400;
 let CENTER_Y = 300;
 let MAX_DISTANCE = 100;
 
+class Field {
+  constructor(stage) {
+    this.stage = stage;
+    this.renderField();
+    this.gamePieces();
+  }
+
+  createPlayerPaddle() {
+    const humanPaddle = new createjs.Shape();
+    humanPaddle.graphics
+      .beginStroke("DarkBlue")
+      .setStrokeStyle(4)
+      .beginFill("LightBlue")
+      .drawRoundRect(0, 0, 120, 80, 10);
+    humanPaddle.name = 'humanPaddle';
+    humanPaddle.alpha= 0.5;
+    humanPaddle.prevX = 0;
+    humanPaddle.prevY = 0;
+
+    this.stage.addChild(humanPaddle);
+  }
+
+  createAiPaddle() {
+    const cpuPaddle = new createjs.Shape();
+    cpuPaddle.graphics
+      .beginStroke("Red")
+      .setStrokeStyle(2)
+      .beginFill("Pink")
+      .drawRoundRect(385, 290, 30, 20, 3);
+    cpuPaddle.name = 'cpuPaddle';
+    cpuPaddle.alpha = 0.5;
+    cpuPaddle.rawX = 0;
+    cpuPaddle.rawY = 0;
+    cpuPaddle.prevRawX = 0;
+    cpuPaddle.prevRawY = 0;
+
+    this.stage.addChild(cpuPaddle);
+  }
+
+  createBall() {
+    const ball = new createjs.Shape();
+    ball.graphics
+      .beginFill("ghostwhite")
+      .drawPolyStar(0, 0, 40, 10, 0.1);
+    ball.name = 'ball';
+
+    this.stage.addChild(ball);
+  }
+
+  gamePieces() {
+    this.createPlayerPaddle();
+    this.createBall();
+    this.createAiPaddle();
+
+    createjs.Ticker.addEventListener('tick', this.movePaddles.bind(this));
+    createjs.Ticker.setFPS(60);
+  }
+
+  movePlayerPaddle() {
+    const playerPaddle = this.stage.getChildByName('humanPaddle');
+
+    let difX;
+    let difY;
+
+    // console.log(stage.mouseX);
+    // console.log(stage.mouseY);
+
+    if (this.stage.mouseX < 652 && this.stage.mouseX > 148){
+      difX = this.stage.mouseX - humanPaddle.x - 60;
+    } else if (this.stage.mouseX <= 148){
+      difX = 148 - humanPaddle.x - 60;
+    } else {
+      difX = 652 - humanPaddle.x - 60;
+    }
+
+    if (this.stage.mouseY < 432 && this.stage.mouseY > 131){
+      difY = this.stage.mouseY - humanPaddle.y - 40;
+    } else if (this.stage.mouseY <= 131){
+      difY = 131 - humanPaddle.y - 40;
+    } else {
+      difY = 469 - humanPaddle.y - 40;
+    }
+
+    humanPaddle.prevX = humanPaddle.x;
+    humanPaddle.prevY = humanPaddle.y;
+    humanPaddle.x += difX/1.2;
+    humanPaddle.y += difY/1.2;
+  }
+
+  moveAiPaddle() {
+    const ball = this.stage.getChildByName('ball');
+    const cpuPaddle = this.stage.getChildByName('cpuPaddle');
+    const cpuDifX = ball.rawX - 400 - cpuPaddle.rawX;
+    const cpuDifY = ball.rawY - 300 - cpuPaddle.rawY;
+
+    cpuPaddle.x = cpuPaddle.rawX * 79/312;
+    cpuPaddle.y = cpuPaddle.rawY * 53/209;
+
+    cpuPaddle.prevX = cpuPaddle.rawX;
+    cpuPaddle.prevY = cpuPaddle.rawY;
+    cpuPaddle.rawX += cpuDifX/24;
+    if (cpuPaddle.rawX > 249){
+      cpuPaddle.rawX = 249;
+    } else if (cpuPaddle.rawX < -241) {
+      cpuPaddle.rawX = -241;
+    }
+
+    cpuPaddle.rawY += cpuDifY/25;
+    if (cpuPaddle.rawY > 161){
+      cpuPaddle.rawY = 161;
+    } else if (cpuPaddle.rawY < -161) {
+      cpuPaddle.rawY = -161;
+    }
+  }
+
+  movePaddles() {
+    this.moveHumanPaddle();
+    this.moveCpuPaddle();
+    this.stage.update();
+  }
+
+  createField() {
+    const borderFront = new createjs.Shape();
+    const borderEnd = new createjs.Shape();
+
+    drawRectangle(this.stage, borderFront, { x: 88, y: 91, w: 624, h: 418 });
+    drawRectangle(this.stage, borderEnd, { x: 322, y: 247, w: 158, h: 106 });
+
+    let cornerNW = new createjs.Shape();
+    let cornerNE = new createjs.Shape();
+    let cornerSE = new createjs.Shape();
+    let cornerSW = new createjs.Shape();
+
+    drawCorner(this.stage, cornerNW, { mtx: 88, mty: 91, ltx: 322, lty: 247 });
+    drawCorner(this.stage, cornerNW, { mtx: 712, mty: 91, ltx: 479, lty: 247 });
+    drawCorner(this.stage, cornerNW, { mtx: 712, mty: 509, ltx: 479, lty: 353 });
+    drawCorner(this.stage, cornerNW, { mtx: 88, mty: 509, ltx: 322, lty: 353 });
+  }
+
+
 const init = () => {
   const stage = new createjs.Stage("myCanvas");
 
-  renderField(stage);
-  gamePieces(stage);
+  let field = new Field(stage)
 
   const tracker = new createjs.Shape();
   drawTracker(stage, tracker);
@@ -28,98 +167,6 @@ const setStage = (ball, stage, tracker) => () => {
   ball.xSpin = 0;
   ball.ySpin = 0;
   stage.on('mousedown', hitBall(ball, stage, tracker));
-};
-
-const gamePieces = (stage) => {
-  const humanPaddle = new createjs.Shape();
-    humanPaddle.graphics
-      .beginStroke("DarkBlue")
-      .setStrokeStyle(4)
-      .beginFill("LightBlue")
-      .drawRoundRect(0, 0, 120, 80, 10);
-    humanPaddle.name = 'humanPaddle';
-    humanPaddle.alpha= 0.5;
-    humanPaddle.prevX = 0;
-    humanPaddle.prevY = 0;
-
-  const cpuPaddle = new createjs.Shape();
-    cpuPaddle.graphics
-      .beginStroke("Red")
-      .setStrokeStyle(2)
-      .beginFill("Pink")
-      .drawRoundRect(385, 290, 30, 20, 3);
-    cpuPaddle.name = 'cpuPaddle';
-    cpuPaddle.alpha = 0.5;
-    cpuPaddle.rawX = 0;
-    cpuPaddle.rawY = 0;
-    cpuPaddle.prevRawX = 0;
-    cpuPaddle.prevRawY = 0;
-
-  const ball = new createjs.Shape();
-    ball.graphics
-      .beginFill("ghostwhite")
-      .drawPolyStar(0, 0, 40, 10, 0.1);
-    ball.name = 'ball';
-
-  stage.addChild(cpuPaddle);
-  stage.addChild(ball);
-  stage.addChild(humanPaddle);
-
-  createjs.Ticker.addEventListener('tick', cursor);
-
-  function cursor(event){
-    let difX;
-    let difY;
-
-    // console.log(stage.mouseX);
-    // console.log(stage.mouseY);
-
-    if (stage.mouseX < 652 && stage.mouseX > 148){
-      difX = stage.mouseX - humanPaddle.x - 60;
-    } else if (stage.mouseX <= 148){
-      difX = 148 - humanPaddle.x - 60;
-    } else {
-      difX = 652 - humanPaddle.x - 60;
-    }
-
-    if (stage.mouseY < 432 && stage.mouseY > 131){
-      difY = stage.mouseY - humanPaddle.y - 40;
-    } else if (stage.mouseY <= 131){
-      difY = 131 - humanPaddle.y - 40;
-    } else {
-      difY = 469 - humanPaddle.y - 40;
-    }
-
-    const ball = stage.getChildByName('ball');
-    let cpuDifX = ball.rawX - 400 - cpuPaddle.rawX;
-    let cpuDifY = ball.rawY - 300 - cpuPaddle.rawY;
-
-    cpuPaddle.x = cpuPaddle.rawX * 79/312;
-    cpuPaddle.y = cpuPaddle.rawY * 53/209;
-
-    cpuPaddle.prevX = cpuPaddle.rawX;
-    cpuPaddle.prevY = cpuPaddle.rawY;
-    cpuPaddle.rawX += cpuDifX/24;
-    if (cpuPaddle.rawX > 249){
-      cpuPaddle.rawX = 249;
-    } else if (cpuPaddle.rawX < -241) {
-      cpuPaddle.rawX = -241;
-    }
-
-    cpuPaddle.rawY += cpuDifY/25;
-    if (cpuPaddle.rawY > 161){
-      cpuPaddle.rawY = 161;
-    } else if (cpuPaddle.rawY < -161) {
-      cpuPaddle.rawY = -161;
-    }
-
-    humanPaddle.prevX = humanPaddle.x;
-    humanPaddle.prevY = humanPaddle.y;
-    humanPaddle.x += difX/1.2;
-    humanPaddle.y += difY/1.2;
-
-    stage.update();
-  }
 };
 
 const drawTracker = (stage, tracker) => {
@@ -256,23 +303,5 @@ const drawCorner = (stage, shape, { mtx, mty, ltx, lty }) => {
 
   stage.addChild(shape);
 };
-
-const renderField = stage => {
-
-  const borderFront = new createjs.Shape();
-  const borderEnd = new createjs.Shape();
-
-  drawRectangle(stage, borderFront, { x: 88, y: 91, w: 624, h: 418 });
-  drawRectangle(stage, borderEnd, { x: 322, y: 247, w: 158, h: 106 });
-
-  let cornerNW = new createjs.Shape();
-  let cornerNE = new createjs.Shape();
-  let cornerSE = new createjs.Shape();
-  let cornerSW = new createjs.Shape();
-
-  drawCorner(stage, cornerNW, { mtx: 88, mty: 91, ltx: 322, lty: 247 });
-  drawCorner(stage, cornerNW, { mtx: 712, mty: 91, ltx: 479, lty: 247 });
-  drawCorner(stage, cornerNW, { mtx: 712, mty: 509, ltx: 479, lty: 353 });
-  drawCorner(stage, cornerNW, { mtx: 88, mty: 509, ltx: 322, lty: 353 });
 
 };
