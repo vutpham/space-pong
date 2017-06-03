@@ -2,7 +2,7 @@
 
 Pong 3D is a pure Javascript and HTML adaptation of Curveball, a three-dimensional version of the classic pong game.
 
-![img]
+![image](./docs/pong_game.png)
 
 ## Instructions
 
