@@ -1,5 +1,7 @@
 # Pong 3D
 
+[LIVE LINK](https://vutpham.github.io/3dpong/)
+
 Pong 3D is a pure Javascript and HTML adaptation of Curveball, a three-dimensional version of the classic pong game.
 
 ![image](./docs/pong_game.png)
