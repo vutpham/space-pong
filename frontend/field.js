@@ -3,7 +3,8 @@ let CENTER_Y = 300;
 let MAX_DISTANCE = 100;
 
 class Field {
-  constructor(stage) {
+  constructor(stage, game) {
+    this.game = game;
     this.stage = stage;
     this.createField();
     this.gamePieces();
@@ -70,6 +71,7 @@ class Field {
     ball.graphics
       .beginFill("ghostwhite")
       .drawPolyStar(0, 0, 35, 10, 0.1);
+    ball.alpha = 0.99;
     ball.name = 'ball';
 
     this.createTracker();
@@ -135,7 +137,7 @@ class Field {
 
     cpuPaddle.prevX = cpuPaddle.rawX;
     cpuPaddle.prevY = cpuPaddle.rawY;
-    cpuPaddle.rawX += cpuDifX/24;
+    cpuPaddle.rawX += cpuDifX/25;
     if (cpuPaddle.rawX > 249){
       cpuPaddle.rawX = 249;
     } else if (cpuPaddle.rawX < -241) {
@@ -225,15 +227,16 @@ class Field {
         && ball.x + (ball.radius - 10) >= playerPaddle.x
         && ball.y - (ball.radius - 10) <= playerPaddle.y + 60
         && ball.y + (ball.radius - 10) >= playerPaddle.y) {
-      console.log(`${playerPaddle.x}, ${playerPaddle.prevX}`);
+      // console.log(`${playerPaddle.x}, ${playerPaddle.prevX}`);
       this.getSpin();
     } else {
-      console.log(`${ball.x}, ${ball.radius}`);
-      console.log(`${playerPaddle.x}, ${playerPaddle.prevX}`);
-      console.log('did not hit');
+      // console.log(`${ball.x}, ${ball.radius}`);
+      // console.log(`${playerPaddle.x}, ${playerPaddle.prevX}`);
+      // console.log('did not hit');
       this.ticker.removeAllEventListeners('tick');
       this.ticker.addEventListener('tick', this.movePaddles.bind(this));
-      setTimeout(this.setStage.bind(this), 1000);
+      // setTimeout(this.setStage.bind(this), 1000);
+      this.game.resetPieces('player');
     }
   }
 
@@ -249,7 +252,8 @@ class Field {
     } else {
       this.ticker.removeAllEventListeners('tick');
       this.ticker.addEventListener('tick', this.movePaddles.bind(this));
-      setTimeout(this.setStage.bind(this), 1000);
+      // setTimeout(this.setStage.bind(this), 1000);
+      this.game.resetPieces('cpu');
     }
   }
 
