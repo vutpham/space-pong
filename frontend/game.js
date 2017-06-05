@@ -67,7 +67,8 @@ class Game {
 
   // Logic to update lives
   updateCpuLives() {
-    if (this.cpulives > 0) {
+    console.log(this.cpuLives);
+    if (this.cpuLives > 0) {
       this.cpuLivesStock[this.cpuLives - 1].graphics.clear();
       this.cpuLives -= 1;
     } else {
@@ -86,12 +87,13 @@ class Game {
 
   printYouWon() {
     const text = new createjs.Text("You Win", "36px Arial", "Red");
-    text.x = 380;
+    text.x = 350;
     text.y = 300;
     text.textBaseline = "alphabetic";
 
     this.stage.addChild(text);
     setTimeout(this.setStage.bind(this), 1000);
+    this.stage.removeChild(text);
     this.stage.update();
   }
 
