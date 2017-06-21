@@ -52,6 +52,7 @@ class Game {
 
     this.stage.addChild(text);
     this.showCpuLives();
+
     this.stage.update();
   }
 
@@ -73,14 +74,16 @@ class Game {
     } else {
       setTimeout(this.showCpuLives.bind(this), 1000);
     }
+    setTimeout(this.setStage.bind(this), 1000);
   }
 
   updatePlayerLives() {
     if (this.playerLives > 0) {
       this.playerLivesStock[this.playerLives - 1].graphics.clear();
       this.playerLives -= 1;
+      setTimeout(this.setStage.bind(this), 1000);
     } else {
-      setTimeout(this.showPlayerLives.bind(this), 1000);
+      this.printGameOver();
     }
   }
 
@@ -117,6 +120,54 @@ class Game {
       .drawCircle((160 + i * 25), 62, 10);
       this.stage.addChild(this.cpuLivesStock[i]);
     }
+  }
+
+  printGameOver() {
+    const frame = new createjs.Shape();
+    frame.graphics
+      .beginFill("#555")
+      .drawRoundRect(275, 250, 250, 100, 5);
+
+    const gameOver = new createjs.Text(`Game Over`, "42px Arial", "#FFF");
+    gameOver.x = 290;
+    gameOver.y = 315;
+    gameOver.textBaseline = "alphabetic";
+
+    const spaceText = new createjs.Text(`Click to restart`, "24px Arial", "#FFF8F0");
+    spaceText.x = 320;
+    spaceText.y = 550;
+    spaceText.textBaseline = "alphabetic";
+
+    this.stage.addChild(frame);
+    this.stage.addChild(gameOver);
+    this.stage.addChild(spaceText);
+
+    this.stage.update();
+
+    this.stage.on('mousedown', this.restart.bind(this));
+  }
+
+  resetPieces(loser) {
+    if(loser === 'cpu') {
+      this.updateCpuLives();
+    } else {
+      this.updatePlayerLives();
+    }
+  }
+
+  restart() {
+    this.stage.removeAllEventListeners();
+    this.field.ticker.removeAllEventListeners();
+    this.stage.removeAllChildren();
+
+    this.cpuStrikes = 3;
+    this.humanStrikes = 3;
+
+    this.field = new Field(this.stage, this);
+
+    this.displayCpu();
+    this.displayPlayer();
+    this.setStage();
   }
 
 }
