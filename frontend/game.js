@@ -1,141 +1,169 @@
-const Field = require('./field.js');
-const Ball = require('./ball.js');
+import Field from './field';
+import Ball from './ball';
+
+const FONT = "Arial"
 
 class Game {
+
   constructor() {
-    this.stage = new createjs.Stage("myCanvas");
+    this.stage = this.stage || new createjs.Stage("myCanvas");
+    this.stage.canvas.style.cursor = "none";
+
+    this.cpuStrikes = 2;
+    this.humanStrikes = 5;
+    this.level = 1;
+
     this.field = new Field(this.stage, this);
 
-    this.cpuLives = 3;
-    this.playerLives = 3;
-
-    this.displayPlayer();
-    this.displayCpu();
-    this.setStage();
+    this.playDemo();
+    this.handleKeydown();
   }
 
-  setStage() {
-    const ball = this.stage.getChildByName('ball');
-    const tracker = this.stage.getChildByName('tracker');
-    ball.x = 400;
-    ball.y = 300;
-    ball.rawX = 400;
-    ball.rawY = 300;
-    ball.scaleX = 1;
-    ball.scaleY = 1;
-    ball.xVelocity = 0;
-    ball.yVelocity = 0;
-    ball.direction = "out";
-    ball.distance = 0;
-    ball.xSpin = 0;
-    ball.ySpin = 0;
-    tracker.graphics.clear().beginStroke("White").drawRect(88, 91, 624, 418);
-    console.log(this);
-    this.stage.on('mousedown', this.field.hitBall.bind(this.field));
+  playDemo() {
+    this.field.ball.xSpin = -20;
+    this.field.ball.ySpin = -30;
+    this.field.ball.maxDistance = 50;
+    this.field.maxDistance = 50;
+    this.field.hitBall();
+    this.buildInstructions();
+    this.flashInstructions();
+
+    this.startGame = this.startGame.bind(this);
+    document.addEventListener('mousedown', this.startGame);
   }
 
-  resetPieces(losingPlayer) {
-    if (losingPlayer === 'cpu') {
-      this.updateCpuLives();
-    } else {
-      this.updatePlayerLives();
+  buildInstructions() {
+    const text = new createjs.Text("CLICK TO START", `20px ${FONT}`, "#FA9F42");
+    text.x = 330;
+    text.y = 462;
+    text.textBaseline = "alphabetic";
+    this.instructions = text;
+
+    this.tips = [];
+    this.tips[0] = new createjs.Text("", `20px ${FONT}`, "ghostwhite");
+    this.tips[0].x = 200;
+    this.tips[0].y = 5;
+
+    this.tips[1] = new createjs.Text("CLICK TO SERVE", `20px ${FONT}`, "ghostwhite");
+    this.tips[1].x = 315;
+    this.tips[1].y = 5;
+
+    this.tips[2] = new createjs.Text("CURVE THE BALL WITH YOUR PADDLE", `20px ${FONT}`, "ghostwhite");
+    this.tips[2].x = 210;
+    this.tips[2].y = 30;
+
+    this.tips[3] = new createjs.Text("USE CURVE TO BEAT THE CPU!", `20px ${FONT}`, "ghostwhite");
+    this.tips[3].x = 245;
+    this.tips[3].y = 55;
+
+    this.tips.forEach( (tip, index) => {
+      this.stage.addChild(tip);
+    });
+  }
+
+  flashInstructions() {
+    this.interval = setInterval( () => this.toggleChild(this.instructions), 500);
+  }
+
+  clearInstructions() {
+    clearInterval(this.interval);
+    this.removeChild(this.instructions);
+  }
+
+  removeChild(child) {
+    if (this.stage.contains(child)) {
+      this.stage.removeChild(child);
     }
-    setTimeout(this.setStage.bind(this), 1000);
+    this.stage.update();
   }
 
+  toggleChild(child) {
+    if (this.stage.contains(child)) {
+      this.stage.removeChild(child);
+    } else {
+      this.stage.addChild(child);
+    }
+    this.stage.update();
+  }
 
-  // Displays Player/CPU & Lives
-  displayCpu() {
-    const text = new createjs.Text("CPU", "20px Arial", "White");
+  startGame() {
+    this.clearInstructions();
+    this.buildCpuScore();
+    this.buildHumanScore();
+    this.printLevel();
+    document.removeEventListener('mousedown', this.startGame);
+    this.field.audio = true;
+    this.field.humanPaddle.demo = false;
+    this.field.cpuPaddle.demo = false;
+    this.restart();
+  }
+
+  toggleAudio() {
+    this.field.audio = !this.field.audio;
+  }
+
+  handleKeydown() {
+    document.addEventListener('keydown', this.toggleAudio.bind(this));
+  }
+
+  buildCpuScore() {
+    const text = new createjs.Text("CPU", `20px ${FONT}`, "ghostwhite");
     text.x = 100;
-    text.y = 52;
-
-    this.stage.addChild(text);
-    this.showCpuLives();
-
-    this.stage.update();
-  }
-
-  displayPlayer() {
-    const text = new createjs.Text("Player", "20px Arial", "White");
-    text.x = 650;
-    text.y = 52;
-
-    this.stage.addChild(text);
-    this.showPlayerLives();
-    this.stage.update();
-  }
-
-  // Logic to update lives
-  updateCpuLives() {
-    if (this.cpuLives > 0) {
-      this.cpuLivesStock[this.cpuLives - 1].graphics.clear();
-      this.cpuLives -= 1;
-    } else {
-      setTimeout(this.showCpuLives.bind(this), 1000);
-    }
-    setTimeout(this.setStage.bind(this), 1000);
-  }
-
-  updatePlayerLives() {
-    if (this.playerLives > 0) {
-      this.playerLivesStock[this.playerLives - 1].graphics.clear();
-      this.playerLives -= 1;
-      setTimeout(this.setStage.bind(this), 1000);
-    } else {
-      this.printGameOver();
-    }
-  }
-
-  printYouWon() {
-    const text = new createjs.Text("You Win", "36px Arial", "Red");
-    text.x = 350;
-    text.y = 300;
+    text.y = 70;
     text.textBaseline = "alphabetic";
 
     this.stage.addChild(text);
-    setTimeout(this.setStage.bind(this), 1000);
-    this.stage.removeChild(text);
+    this.buildCpuStrikes();
+
     this.stage.update();
   }
 
-  // Show lives stocks
-  showPlayerLives() {
-    this.playerLivesStock = [];
-    for (let i = 0; i < this.playerLives; i++) {
-      this.playerLivesStock[i] = new createjs.Shape();
-      this.playerLivesStock[i].graphics
-      .beginFill("Yellow")
-      .drawCircle((630 - i * 25), 62, 10);
-      this.stage.addChild(this.playerLivesStock[i]);
+  buildCpuStrikes() {
+    this.cpuStrikeShapes = [];
+    for (let i = 0; i < this.cpuStrikes; i++) {
+      this.cpuStrikeShapes[i] = new createjs.Shape();
+      this.cpuStrikeShapes[i].graphics.beginFill("#cc0000").drawCircle((160 + i * 25), 62, 10);
+
+      this.stage.addChild(this.cpuStrikeShapes[i]);
     }
   }
 
-  showCpuLives() {
-    this.cpuLivesStock = [];
-    for (let i = 0; i < this.cpuLives; i++) {
-      this.cpuLivesStock[i] = new createjs.Shape();
-      this.cpuLivesStock[i].graphics
-      .beginFill("White")
-      .drawCircle((160 + i * 25), 62, 10);
-      this.stage.addChild(this.cpuLivesStock[i]);
+  buildHumanScore() {
+    const text = new createjs.Text("Player", `20px ${FONT}`, "ghostwhite");
+    text.x = 650;
+    text.y = 70;
+    text.textBaseline = "alphabetic";
+
+    this.stage.addChild(text);
+    this.buildHumanStrikes();
+
+    this.stage.update();
+  }
+
+  buildHumanStrikes() {
+    this.humanStrikeShapes = [];
+    for (let i = 0; i < this.humanStrikes; i++) {
+      this.humanStrikeShapes[i] = new createjs.Shape();
+      this.humanStrikeShapes[i].graphics.beginFill("royalblue").drawCircle((630 - i * 25), 62, 10);
+
+      this.stage.addChild(this.humanStrikeShapes[i]);
     }
   }
 
   printGameOver() {
     const frame = new createjs.Shape();
     frame.graphics
-      .beginFill("#555")
-      .drawRoundRect(275, 250, 250, 100, 5);
+      .beginFill("black")
+      .drawRoundRect(255, 250, 290, 100, 5);
 
-    const gameOver = new createjs.Text(`Game Over`, "42px Arial", "#FFF");
+    const gameOver = new createjs.Text(`Game Over`, `42px ${FONT}`, "#E0E0E2");
     gameOver.x = 290;
-    gameOver.y = 315;
+    gameOver.y = 300;
     gameOver.textBaseline = "alphabetic";
 
-    const spaceText = new createjs.Text(`Click to restart`, "24px Arial", "#FFF8F0");
-    spaceText.x = 320;
-    spaceText.y = 550;
+    const spaceText = new createjs.Text(`Click to restart`, `22px ${FONT}`, "ghostwhite");
+    spaceText.x = 330;
+    spaceText.y = 330;
     spaceText.textBaseline = "alphabetic";
 
     this.stage.addChild(frame);
@@ -147,11 +175,29 @@ class Game {
     this.stage.on('mousedown', this.restart.bind(this));
   }
 
+  printLevel() {
+    const frame = new createjs.Shape();
+    frame.graphics
+      .beginFill("black")
+      .drawRoundRect(300, 530, 200, 45, 5);
+
+    const text = new createjs.Text(`Level ${this.level}`, `40px ${FONT}`, "#FA9F42");
+    text.x = 340;
+    text.y = 565;
+    text.textBaseline = "alphabetic";
+    text.name = "level";
+
+    this.stage.addChild(frame);
+    this.stage.addChild(text);
+
+    this.stage.update();
+  }
+
   resetPieces(loser) {
     if(loser === 'cpu') {
-      this.updateCpuLives();
+      this.updateCpuStrikes();
     } else {
-      this.updatePlayerLives();
+      this.updateHumanStrikes();
     }
   }
 
@@ -160,20 +206,63 @@ class Game {
     this.field.ticker.removeAllEventListeners();
     this.stage.removeAllChildren();
 
-    this.cpuStrikes = 3;
-    this.humanStrikes = 3;
+    this.cpuStrikes = 2;
+    this.humanStrikes = 5;
+    this.level = 1;
+
+    let audio = this.field.audio;
 
     this.field = new Field(this.stage, this);
+    this.field.humanPaddle.demo = false;
+    this.field.cpuPaddle.demo = false;
+    this.field.audio = audio;
 
-    this.displayCpu();
-    this.displayPlayer();
+    this.buildCpuScore();
+    this.buildHumanScore();
+    this.printLevel();
     this.setStage();
   }
 
+  setStage() {
+    const ballMarker = this.stage.getChildByName('ballMarker');
+
+    this.field.ball.reset();
+    ballMarker.graphics.clear().beginStroke("#444").drawRect(88, 91, 624, 418);
+    this.stage.on('stagemousedown', this.field.hitBall.bind(this.field));
+  }
+
+  updateCpuStrikes() {
+    if(this.cpuStrikes > 0){
+      this.cpuStrikeShapes[this.cpuStrikes - 1].graphics.clear();
+      this.cpuStrikes -= 1;
+    } else {
+      const level = this.stage.getChildByName('level');
+      this.level += 1;
+      level.text = `Level ${this.level}`
+      this.field.cpuTrackingRatio = this.field.cpuTrackingRatio / 1.4 ;
+      this.cpuStrikes = 2;
+      setTimeout( () => {
+        this.field.ball.maxDistance = Math.floor(this.field.ball.maxDistance * 0.95);
+        this.field.maxDistance = this.field.ball.maxDistance;
+      }, 1000);
+      setTimeout(this.buildCpuStrikes.bind(this), 1000);
+    }
+    setTimeout(this.setStage.bind(this), 1000);
+  }
+
+  updateHumanStrikes() {
+    if(this.humanStrikes > 0){
+      this.humanStrikeShapes[this.humanStrikes - 1].graphics.clear();
+      this.humanStrikes -= 1;
+      setTimeout(this.setStage.bind(this), 1000);
+    } else {
+      setTimeout(this.printGameOver.bind(this), 1000);
+    }
+  }
 }
 
 const init = () => {
   const game = new Game;
 };
 
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener("DOMContentLoaded", init)

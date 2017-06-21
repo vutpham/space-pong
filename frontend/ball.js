@@ -1,5 +1,4 @@
-
-INITIAL_RADIUS = 35;
+const INITIAL_RADIUS = 35;
 
 class Ball {
 

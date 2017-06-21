@@ -1,5 +1,6 @@
 body {
-  background-color: #1B998B;
+  background-image: url('http://res.cloudinary.com/dqr2mejhc/image/upload/c_scale,w_612/v1497818771/canvas_back_qu92rm.png');
+  background-repeat: repeat;
 }
 
 h2 {
@@ -12,7 +13,9 @@ h2 {
 }
 
 #myCanvas {
-  background-color: #2D3047;
+  background-image: url('http://res.cloudinary.com/dqr2mejhc/image/upload/c_scale,w_626/v1497818772/space_back_2_keyyer.png');
+  display: block;
+  background-repeat: repeat;
   border-radius: 30px;
   border: 8px solid black;
 }
