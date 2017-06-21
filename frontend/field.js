@@ -260,6 +260,7 @@ class Field {
   getSpin() {
     const ball = this.stage.getChildByName('ball');
     const playerPaddle = this.stage.getChildByName('playerPaddle');
+    const cpuPaddle = this.stage.getChildByName('cpuPaddle');
 
 
     ball.xSpin += playerPaddle.x - playerPaddle.prevX;
@@ -270,8 +271,14 @@ class Field {
   addSpin() {
     const ball = this.stage.getChildByName('ball');
     ball.rotation += 8;
-    ball.xVelocity -= ball.xSpin / MAX_DISTANCE;
-    ball.yVelocity -= ball.ySpin / MAX_DISTANCE;
+
+    if (ball.direction === "out"){
+      ball.xVelocity -= ball.xSpin / this.max_distance;
+      ball.yVelocity -= ball.ySpin / this.max_distance;
+     } else {
+       ball.xVelocity += ball.xSpin / this.max_distance;
+       ball.yVelocity += ball.ySpin / this.max_distance;
+     }
   }
 
   addVelocity() {
@@ -356,11 +363,31 @@ class Field {
   }
 
   hitBall(e) {
-    e.remove();
-    this.getSpin();
+    const ball = this.stage.getChildByName('ball');
+    const humanPaddle = this.stage.getChildByName('humanPaddle');
 
-    this.ticker.addEventListener('tick', this.moveBall.bind(this));
-  }
+    if (ball.x - 35 <= humanPaddle.x + 120
+         && ball.x + 35 >= humanPaddle.x
+         && ball.y - 35 <= humanPaddle.y + 60
+         && ball.y + 35 >= humanPaddle.y) {
+       e.remove();
+       this.nearHit.load();
+       this.nearHit.play();
+       this.getSpin();
+       if (ball.xSpin > 15) {
+         ball.xSpin = 15;
+       }
+       if (ball.xSpin < -15) {
+         ball.xSpin = -15;
+       }
+       if (ball.ySpin > 15) {
+         ball.ySpin = 15;
+       }
+       if (ball.ySpin < -15) {
+         ball.ySpin = -15;
+       }
+       this.ticker.addEventListener('tick', this.moveBall.bind(this));
+     }
 
 
 }
