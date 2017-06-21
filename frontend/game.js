@@ -67,12 +67,11 @@ class Game {
 
   // Logic to update lives
   updateCpuLives() {
-    console.log(this.cpuLives);
     if (this.cpuLives > 0) {
       this.cpuLivesStock[this.cpuLives - 1].graphics.clear();
       this.cpuLives -= 1;
     } else {
-      this.printYouWon(this);
+      setTimeout(this.showCpuLives.bind(this), 1000);
     }
   }
 
