@@ -28,13 +28,13 @@ class Field {
     this.ticker = createjs.Ticker;
     this.ticker.setFPS(60);
 
-    // this.audio = false;
-    //
-    // this.nearHit = new Audio('./audio/nearhit.mp3');
-    // this.farHit = new Audio('./audio/farhit.mp3');
-    // this.vWallHit = new Audio('./audio/wallhit.mp3');
-    // this.hWallHit = new Audio('./audio/wallhit0.mp3');
-    // this.goal = new Audio('./audio/goal.mp3');
+    this.audio = false;
+
+    this.nearHit = new Audio('./sounds/nearhit.wav');
+    this.farHit = new Audio('./sounds/farhit.wav');
+    this.vWallHit = new Audio('./sounds/wallhit.wav');
+    this.hWallHit = new Audio('./sounds/wallhit0.wav');
+    this.goal = new Audio('./sounds/goal.wav');
 
     this.renderField();
     this.renderPieces();
@@ -44,19 +44,19 @@ class Field {
     if(this.ball.rawX >= 712 || this.ball.rawX <= 88){
       this.ball.xVelocity = this.ball.xVelocity * -1;
       this.ball.xSpin = 0;
-      // if (this.audio) {
-      //   this.vWallHit.load();
-      //   this.vWallHit.play();
-      // }
+      if (this.audio) {
+        this.vWallHit.load();
+        this.vWallHit.play();
+      }
     }
 
     if(this.ball.rawY >= 509 || this.ball.rawY <= 91){
       this.ball.yVelocity = this.ball.yVelocity * -1;
       this.ball.ySpin = 0;
-      // if (this.audio) {
-      //   this.vWallHit.load();
-      //   this.vWallHit.play();
-      // }
+      if (this.audio) {
+        this.vWallHit.load();
+        this.vWallHit.play();
+      }
     }
   }
 
@@ -151,17 +151,17 @@ class Field {
 
   detectHumanHit() {
     if (this.humanPaddle.hit(this.ball)) {
-      // if (this.audio) {
-      //   this.nearHit.load();
-      //   this.nearHit.play();
-      // }
+      if (this.audio) {
+        this.nearHit.load();
+        this.nearHit.play();
+      }
       this.getSpin();
     } else {
       this.ball.fillCommand.style = "#cc0000";
-      // if (this.audio) {
-      //   this.goal.load();
-      //   this.goal.play();
-      // }
+      if (this.audio) {
+        this.goal.load();
+        this.goal.play();
+      }
       this.ticker.removeAllEventListeners('tick');
       this.ticker.addEventListener('tick', this.movePaddles.bind(this));
       this.game.resetPieces('human');
@@ -177,16 +177,16 @@ class Field {
   detectCpuHit() {
     const cpuPaddle = this.stage.getChildByName('cpuPaddle');
     if (this.cpuPaddle.hit(this.ball)) {
-      // if (this.audio) {
-      //   this.farHit.load();
-      //   this.farHit.play();
-      // }
+      if (this.audio) {
+        this.farHit.load();
+        this.farHit.play();
+      }
     } else {
       this.ball.fillCommand.style = HUMAN_COLOR;
-      // if (this.audio) {
-      //   this.goal.load();
-      //   this.goal.play();
-      // }
+      if (this.audio) {
+        this.goal.load();
+        this.goal.play();
+      }
       this.ticker.removeAllEventListeners('tick');
       this.ticker.addEventListener('tick', this.movePaddles.bind(this));
       this.game.resetPieces('cpu');
@@ -208,10 +208,10 @@ class Field {
   hitBall(e = null) {
     if (this.humanPaddle.hit(this.ball)) {
       if (e) e.remove();
-      // if (this.audio) {
-      //   this.nearHit.load();
-      //   this.nearHit.play();
-      // }
+      if (this.audio) {
+        this.nearHit.load();
+        this.nearHit.play();
+      }
       this.getSpin();
       if (this.ball.xSpin > 15) {
         this.ball.xSpin = 15;
