@@ -1,7 +1,7 @@
 import Field from './field';
 import Ball from './ball';
 
-const FONT = "Arial"
+const FONT = 'Coda';
 
 class Game {
 
@@ -45,15 +45,15 @@ class Game {
     this.tips[0].y = 5;
 
     this.tips[1] = new createjs.Text("CLICK TO SERVE", `20px ${FONT}`, "ghostwhite");
-    this.tips[1].x = 315;
+    this.tips[1].x = 320;
     this.tips[1].y = 5;
 
     this.tips[2] = new createjs.Text("CURVE THE BALL WITH YOUR PADDLE", `20px ${FONT}`, "ghostwhite");
-    this.tips[2].x = 210;
+    this.tips[2].x = 225;
     this.tips[2].y = 30;
 
     this.tips[3] = new createjs.Text("USE CURVE TO BEAT THE CPU!", `20px ${FONT}`, "ghostwhite");
-    this.tips[3].x = 245;
+    this.tips[3].x = 260;
     this.tips[3].y = 55;
 
     this.tips.forEach( (tip, index) => {
@@ -179,7 +179,7 @@ class Game {
     const frame = new createjs.Shape();
     frame.graphics
       .beginFill("black")
-      .drawRoundRect(300, 530, 200, 45, 5);
+      .drawRoundRect(298, 530, 200, 45, 5);
 
     const text = new createjs.Text(`Level ${this.level}`, `40px ${FONT}`, "#FA9F42");
     text.x = 340;
