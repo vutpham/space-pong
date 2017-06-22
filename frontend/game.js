@@ -7,7 +7,7 @@ class Game {
 
   constructor() {
     this.stage = this.stage || new createjs.Stage("myCanvas");
-    this.stage.canvas.style.cursor = "none";
+    this.stage.canvas.style.cursor = "display";
 
     this.cpuStrikes = 2;
     this.humanStrikes = 5;
@@ -215,6 +215,7 @@ class Game {
     this.field = new Field(this.stage, this);
     this.field.humanPaddle.demo = false;
     this.field.cpuPaddle.demo = false;
+    this.stage.canvas.style.cursor = "none";
     this.field.audio = audio;
 
     this.buildCpuScore();

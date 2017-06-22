@@ -4,12 +4,12 @@ body {
 }
 
 h2 {
-  -webkit-text-stroke: 1px black;
-  font-family: 'Mogra', cursive;
+  -webkit-text-stroke: 3px black;
+  font-family: 'Orbitron', cursive;
   font-size: 50px;
   padding: 5px;
   margin: 0;
-  color: #ED217C;
+  color: ghostwhite;
 }
 
 #myCanvas {
@@ -18,7 +18,22 @@ h2 {
   background-repeat: repeat;
   border-radius: 30px;
   border: 8px solid black;
-  width: 50%;
+  width: 45%;
+}
+
+.bottom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.buttons {
+  background-color: #304D5B;
+}
+
+.buttons img {
+  width: 50px;
+  padding: 15px
 }
 
 h2 {
