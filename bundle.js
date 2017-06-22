@@ -354,7 +354,7 @@ class Field {
       // }
       this.getSpin();
     } else {
-      this.ball.fillCommand.style = "yellow";
+      this.ball.fillCommand.style = "#cc0000";
       // if (this.audio) {
       //   this.goal.load();
       //   this.goal.play();
