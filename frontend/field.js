@@ -30,11 +30,11 @@ class Field {
 
     this.audio = false;
 
-    this.nearHit = new Audio('./sounds/nearhit.wav');
-    this.farHit = new Audio('./sounds/farhit.wav');
-    this.vWallHit = new Audio('./sounds/wallhit.wav');
-    this.hWallHit = new Audio('./sounds/wallhit0.wav');
-    this.goal = new Audio('./sounds/goal.wav');
+    this.nearHit = new Audio('./asset/sounds/nearhit.wav');
+    this.farHit = new Audio('./asset/sounds/farhit.wav');
+    this.vWallHit = new Audio('./asset/sounds/wallhit.wav');
+    this.hWallHit = new Audio('./asset/sounds/wallhit0.wav');
+    this.goal = new Audio('./asset/sounds/goal.wav');
 
     this.renderField();
     this.renderPieces();
