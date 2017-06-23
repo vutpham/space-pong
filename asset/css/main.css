@@ -18,18 +18,18 @@ h2 {
   background-repeat: repeat;
   border-radius: 30px;
   border: 8px solid black;
-  margin: 15px;
-  width: 90%;
-  height: 90%;
+  width: 98%;
+  height: 98%;
   min-width: 400px;
   min-height: 300px
 }
 
 .game {
   width: 55%;
-  min-width: 430px;
+  min-width: 400px;
   min-height: 300px;
-  margin-right: 10px;
+  margin: 15px;
+  margin-right: 25px;
 }
 
 .instructions {
