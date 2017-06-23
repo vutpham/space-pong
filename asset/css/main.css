@@ -18,20 +18,18 @@ h2 {
   background-repeat: repeat;
   border-radius: 30px;
   border: 8px solid black;
-  width: 45%;
+  margin: 10px;
+  width: 90%;
 }
 
-.bottom {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+.game {
+  width:45%;
 }
 
 .instructions {
   background-color: black;
   color: ghostwhite;
-  padding: 15px;
+  padding: 15px 25px 15px 25px;
   width: 25%;
   margin-top: 15px;
   font-family: 'Coda';
@@ -39,12 +37,15 @@ h2 {
 }
 
 .buttons {
-  background-color: #304D5B;
+  display: flex;
+  justify-content: space-between;
+  width: 80%;
+  padding-left: 10px;
 }
 
 .buttons img {
   width: 50px;
-  padding: 15px
+  padding: 15px 15px 0px 15px;
 }
 
 h3 {
@@ -59,10 +60,10 @@ h2 {
   justify-content: center;
 }
 
-.main {
+#everything {
   display: flex;
-  align-items: center;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: center;
 }
 
 // $teal: #1B998B;
