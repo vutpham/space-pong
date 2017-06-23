@@ -528,12 +528,14 @@ class Game {
     this.restart();
   }
 
-  toggleAudio() {
-    this.field.audio = !this.field.audio;
+  toggleAudio(e) {
+    if (e.keyCode === 109){
+      this.field.audio = !this.field.audio;
+    }
   }
 
   handleKeydown() {
-    document.addEventListener('keydown', this.toggleAudio.bind(this));
+    document.addEventListener('keypress', this.toggleAudio.bind(this));
   }
 
   buildCpuScore() {
