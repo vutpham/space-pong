@@ -489,27 +489,6 @@ class Game {
     text.y = 462;
     text.textBaseline = "alphabetic";
     this.instructions = text;
-
-    this.tips = [];
-    this.tips[0] = new createjs.Text("", `20px ${FONT}`, "ghostwhite");
-    this.tips[0].x = 200;
-    this.tips[0].y = 5;
-
-    this.tips[1] = new createjs.Text("CLICK TO SERVE", `20px ${FONT}`, "ghostwhite");
-    this.tips[1].x = 320;
-    this.tips[1].y = 5;
-
-    this.tips[2] = new createjs.Text("CURVE THE BALL WITH YOUR PADDLE", `20px ${FONT}`, "ghostwhite");
-    this.tips[2].x = 225;
-    this.tips[2].y = 30;
-
-    this.tips[3] = new createjs.Text("USE CURVE TO BEAT THE CPU!", `20px ${FONT}`, "ghostwhite");
-    this.tips[3].x = 260;
-    this.tips[3].y = 55;
-
-    this.tips.forEach( (tip, index) => {
-      this.stage.addChild(tip);
-    });
   }
 
   flashInstructions() {

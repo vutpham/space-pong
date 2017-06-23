@@ -71,6 +71,11 @@ h2 {
   justify-content: center;
 }
 
+.textblock {
+  border-bottom: 3px solid white;
+  padding-bottom: 15px;
+}
+
 #everything {
   display: flex;
   flex-direction: row;
