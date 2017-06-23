@@ -9,7 +9,7 @@ class Game {
     this.stage = this.stage || new createjs.Stage("myCanvas");
     this.stage.canvas.style.cursor = "display";
 
-    this.cpuStrikes = 2;
+    this.cpuStrikes = 3;
     this.humanStrikes = 5;
     this.level = 1;
 
@@ -187,7 +187,7 @@ class Game {
     this.field.ticker.removeAllEventListeners();
     this.stage.removeAllChildren();
 
-    this.cpuStrikes = 2;
+    this.cpuStrikes = 3;
     this.humanStrikes = 5;
     this.level = 1;
 
@@ -214,15 +214,17 @@ class Game {
   }
 
   updateCpuStrikes() {
-    if(this.cpuStrikes > 0){
+    if(this.cpuStrikes > 1){
       this.cpuStrikeShapes[this.cpuStrikes - 1].graphics.clear();
       this.cpuStrikes -= 1;
     } else {
       const level = this.stage.getChildByName('level');
+      this.cpuStrikeShapes[this.cpuStrikes - 1].graphics.clear();
+      this.cpuStrikes -= 1;
       this.level += 1;
       level.text = `Level ${this.level}`
       this.field.cpuTrackingRatio = this.field.cpuTrackingRatio / 1.4 ;
-      this.cpuStrikes = 2;
+      this.cpuStrikes = 3;
       setTimeout( () => {
         this.field.ball.maxDistance = Math.floor(this.field.ball.maxDistance * 0.95);
         this.field.maxDistance = this.field.ball.maxDistance;
