@@ -155,6 +155,7 @@ class Field {
         this.nearHit.load();
         this.nearHit.play();
       }
+      // this.flashHumanPaddle();
       this.getSpin();
     } else {
       this.ball.fillCommand.style = "#cc0000";
@@ -173,6 +174,11 @@ class Field {
     this.ball.xSpin += xSpin;
     this.ball.ySpin += ySpin;
   }
+
+  // flashHumanPaddle() {
+  //   const humanPaddle = this.stage.getChildByName('humanPaddle');
+  //   this.humanPaddle.color = "yellow";
+  // }
 
   detectCpuHit() {
     const cpuPaddle = this.stage.getChildByName('cpuPaddle');

@@ -68,9 +68,8 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, __webpack_exports__) {
+/***/ (function(module, exports) {
 
-"use strict";
 const INITIAL_RADIUS = 35;
 
 class Ball {
@@ -126,7 +125,7 @@ class Ball {
   draw() {
     this.fillCommand = this.shape
       .graphics
-      .beginRadialGradientFill(["#EEE","#444"], [0, 1], 15, -15, 0, 0, 0, 35).command;
+      .beginRadialGradientFill(["#FFF","#383d3a"], [0, 1], 15, -15, 0, 0, 0, 35).command;
     this.silverGradient = this.fillCommand.style;
     this.shape.graphics.drawCircle(0, 0, INITIAL_RADIUS);
 
@@ -352,6 +351,7 @@ class Field {
         this.nearHit.load();
         this.nearHit.play();
       }
+      // this.flashHumanPaddle();
       this.getSpin();
     } else {
       this.ball.fillCommand.style = "#cc0000";
@@ -370,6 +370,11 @@ class Field {
     this.ball.xSpin += xSpin;
     this.ball.ySpin += ySpin;
   }
+
+  // flashHumanPaddle() {
+  //   const humanPaddle = this.stage.getChildByName('humanPaddle');
+  //   this.humanPaddle.color = "yellow";
+  // }
 
   detectCpuHit() {
     const cpuPaddle = this.stage.getChildByName('cpuPaddle');
