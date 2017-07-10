@@ -1,16 +1,18 @@
-# Pong 3D
+# Space Pong
 
-[LIVE LINK](https://vutpham.github.io/3dpong/)
+[LIVE LINK](https://vutpham.github.io/space-pong/)
 
-Pong 3D is a pure Javascript and HTML adaptation of Curveball, a three-dimensional version of the classic pong game.
+Space Pong is an adaptation of Curveball, a three-dimensional version of the classic pong game. It is written in pure JavaScript and HTML. The original version of the game can be found here:  http://www.curveball-game.com/
 
-![image](./docs/pong_game.png)
+![image](./docs/HomeScreen.png)
 
 ## Instructions
 
 The objective of the game is to be the first to score three goals on your opponent. By moving your cursor when the ball hits your paddle, you can apply spin to the ball to make it more challenging for your opponent to respond.
 
 In order to start playing, click on the ball and move your paddle around to prevent the CPU player from scoring.
+
+![gif](./docs/giphy.gif)
 
 ## Technology/Languages Used
 
@@ -113,6 +115,4 @@ In the future, when levels are added, the distance between the CPU paddle and th
 
 ## Future Implementations
 
-- [ ] Sounds
-- [ ] Levels
 - [ ] PvP Features
