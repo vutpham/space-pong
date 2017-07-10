@@ -30,27 +30,21 @@ Technologies Used:
 #### Object Creation
 
 ```javascript
-//field.js
+//ball.js
+draw() {
+  this.fillCommand = this.shape
+    .graphics
+    .beginRadialGradientFill(["#FFF","#383d3a"], [0, 1], 15, -15, 0, 0, 0, 35).command;
+  this.silverGradient = this.fillCommand.style;
+  this.shape.graphics.drawCircle(0, 0, INITIAL_RADIUS);
 
-createBall() {
-  // creation of ball using Easel.js
-  const ball = new createjs.Shape();
-  ball.graphics
-    .beginFill("ghostwhite")
-    .drawPolyStar(0, 0, 35, 10, 0.1);
-  ball.name = 'ball';
-
-  // logic for ball tracker
-  this.createTracker();
-
-  // appends ball to stage
-  this.stage.addChild(ball);
+  this.stage.addChild(this.shape);
 }
 ```
 
 #### Ticker Object
 
-The Ticker is provided by Easel.js and updates the game objects at a rate of 60 FPS.
+The Ticker is provided by Easel.js and updates the game objects at a rate of 60 FPS.  With an object constantly ticking in the background, we can constantly update the 'distance' property on our screen in order to scale the ball and the ball tracker.  After starting the game, the ticker object continuously ticks until the either the Player or CPU loses the round.
 
 ```javascript
 
@@ -63,8 +57,7 @@ this.ticker.addEventListener('tick', this.moveBall.bind(this));
 #### 3d Rendering
 
 ```javascript
-
-// distance is updated by the tick event listener and the moveBall function
+// ball.js
 
 updateDistance() {
   const ball = this.stage.getChildByName('ball');
@@ -77,13 +70,16 @@ updateDistance() {
 }
 ```
 
-At MAX_DISTANCE, the ball is scaled to 1/3 of its original size:
+At maxDistance, the ball is scaled to 1/4 of its original size:
 
 ```javascript
+// ball.js
+scaleBall() {
+  this.shape.scaleX = 1 - this.distance * 3 / (4 * this.maxDistance);
+  this.shape.scaleY = 1 - this.distance * 3 / (4 * this.maxDistance);
 
-ball.scaleX = 1 - ball.distance * 2 / (3 * MAX_DISTANCE);
-ball.scaleY = 1 - ball.distance * 2 / (3 * MAX_DISTANCE);
-ball.radius = 35 * ball.scaleX;
+  this.radius = 35 * this.shape.scaleX;
+}
 ```
 
 #### Spin and Curving
@@ -115,4 +111,4 @@ In the future, when levels are added, the distance between the CPU paddle and th
 
 ## Future Implementations
 
-- [ ] PvP Features
+- [ ] PvP Features using websocketting 
