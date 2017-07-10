@@ -53,7 +53,7 @@ class Ball {
   draw() {
     this.fillCommand = this.shape
       .graphics
-      .beginRadialGradientFill(["#7209a5","#0f0016"], [0, 1], -8, -8, 0, 0, 0, 35).command;
+      .beginRadialGradientFill(["#f7e2ff","#432a4c"], [0, 1], -8, -8, 0, 0, 0, 35).command;
     this.silverGradient = this.fillCommand.style;
     this.shape.graphics.drawCircle(0, 0, INITIAL_RADIUS);
 
