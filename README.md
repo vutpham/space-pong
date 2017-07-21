@@ -8,7 +8,7 @@ Space Pong is an adaptation of Curveball, a three-dimensional version of the cla
 
 ## Instructions
 
-The objective of the game is to be the first to score three goals on your opponent. By moving your cursor when the ball hits your paddle, you can apply spin to the ball to make it more challenging for your opponent to respond.
+The objective of the game is to score as many points on your opponent as possible, given 5 lives. Levels progress after every three goals against your opponent.  By moving your cursor when the ball hits your paddle, you can apply spin to the ball to make it more challenging for your opponent to respond.
 
 In order to start playing, click on the ball and move your paddle around to prevent the CPU player from scoring.
 
@@ -111,4 +111,4 @@ In the future, when levels are added, the distance between the CPU paddle and th
 
 ## Future Implementations
 
-- [ ] PvP Features using websocketting 
+- [ ] PvP Features using websocketting
